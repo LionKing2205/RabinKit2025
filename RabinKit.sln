@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabinKit.App", "RabinKit.App\RabinKit.App.csproj", "{F8E42C62-0B98-4C1D-97A0-48B843C48740}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0E1206E-F220-4AD3-B95E-F3A8ACE014CF} = {C0E1206E-F220-4AD3-B95E-F3A8ACE014CF}
+		{FD65EFE9-461D-43DA-A677-7C6B69AB18A0} = {FD65EFE9-461D-43DA-A677-7C6B69AB18A0}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabinKit.BlockLib", "RabinKit.BlockLib\RabinKit.BlockLib.csproj", "{A3C710C8-3A16-4525-8BAC-917798F26160}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabinKit.Core", "RabinKit.Core\RabinKit.Core.csproj", "{C0E1206E-F220-4AD3-B95E-F3A8ACE014CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabinKit.Database", "RabinKit.Database\RabinKit.Database.csproj", "{FD65EFE9-461D-43DA-A677-7C6B69AB18A0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0E1206E-F220-4AD3-B95E-F3A8ACE014CF} = {C0E1206E-F220-4AD3-B95E-F3A8ACE014CF}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C7041436-DAD6-4762-89A0-ED874A3523B0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F8E42C62-0B98-4C1D-97A0-48B843C48740}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8E42C62-0B98-4C1D-97A0-48B843C48740}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8E42C62-0B98-4C1D-97A0-48B843C48740}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{F8E42C62-0B98-4C1D-97A0-48B843C48740}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8E42C62-0B98-4C1D-97A0-48B843C48740}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8E42C62-0B98-4C1D-97A0-48B843C48740}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{A3C710C8-3A16-4525-8BAC-917798F26160}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3C710C8-3A16-4525-8BAC-917798F26160}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3C710C8-3A16-4525-8BAC-917798F26160}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3C710C8-3A16-4525-8BAC-917798F26160}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0E1206E-F220-4AD3-B95E-F3A8ACE014CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0E1206E-F220-4AD3-B95E-F3A8ACE014CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0E1206E-F220-4AD3-B95E-F3A8ACE014CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0E1206E-F220-4AD3-B95E-F3A8ACE014CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD65EFE9-461D-43DA-A677-7C6B69AB18A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD65EFE9-461D-43DA-A677-7C6B69AB18A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD65EFE9-461D-43DA-A677-7C6B69AB18A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD65EFE9-461D-43DA-A677-7C6B69AB18A0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F8E42C62-0B98-4C1D-97A0-48B843C48740} = {C7041436-DAD6-4762-89A0-ED874A3523B0}
+		{A3C710C8-3A16-4525-8BAC-917798F26160} = {C7041436-DAD6-4762-89A0-ED874A3523B0}
+		{C0E1206E-F220-4AD3-B95E-F3A8ACE014CF} = {C7041436-DAD6-4762-89A0-ED874A3523B0}
+		{FD65EFE9-461D-43DA-A677-7C6B69AB18A0} = {C7041436-DAD6-4762-89A0-ED874A3523B0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8E6E09E3-4F55-48FC-84BD-6FB7AFF2D96A}
+	EndGlobalSection
+EndGlobal

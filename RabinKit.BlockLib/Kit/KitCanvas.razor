@@ -1,0 +1,47 @@
+﻿@using Microsoft.JSInterop
+@using System.Net.Http.Json
+@using System.Text.Json.Nodes
+@using RabinKit.BlockLib.Extensions
+@using System.Diagnostics
+@using System.Text.Json
+@inject IJSRuntime JS
+
+<div id="blocklyArea" style="height: 100%; width: 100%">
+    <div id="blocklyDiv" style="position: absolute; flex-basis: 100%; height: 100%; min-width: 600px; min-height: 800px"></div>
+</div>
+
+@code {
+    private IJSObjectReference _workspace;
+    private dynamic _module;
+    [Parameter] public JsonObject ToolBox { get; set; }
+    [Parameter] public string? Playground { get; set; }
+    [Parameter] public IEnumerable<string> Parameters { get; set; }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JS.Import<KitCanvas>("js/index.bundle.js");
+            var paramarray = Parameters.ToArray();
+            _workspace = await _module.init<IJSObjectReference>(ToolBox,Playground, Parameters.ToArray());
+         //   await _module.load<string>(_workspace);
+        }
+    }
+
+
+
+    public async Task<string> GenerateAsync()
+    {
+        string code = await _module.generate<string>(_workspace);
+
+        return code;
+    }
+
+    public async Task<string?> SaveAsync()
+    {
+        string playground = await _module.save<string>(_workspace);
+
+        return playground;
+    }
+}

@@ -1,0 +1,182 @@
+﻿@page "/module/{moduleId:long}/{taskId:long}"
+
+@using System.Text.Json.Nodes
+@using System.Text.Json
+@using System.Reflection
+
+@using RabinKit.App.Components.Dialogs
+@using RabinKit.BlockLib.Kit
+@using RabinKit.Core.Entities
+@using Microsoft.EntityFrameworkCore
+
+@inject IDbContext DbContext
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+
+@* @inject IDbContext DbContext *@
+@* @inject IDialogService DialogService
+@inject ISnackbar Snackbar  *@
+
+<SectionContent SectionId="@Layout.MainLayout.TopbarSection">
+    @_task.Name
+</SectionContent>
+<MudButton OnClick="@GoBack" Color="Color.Primary">Назад</MudButton>
+<MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Inherit" OnClick="@SaveAsync">
+    Сохранить
+</MudButton>
+<MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Inherit" OnClick="@RunAsync">
+    Запустить
+</MudButton>
+<dv>Время решения: @GetFormattedElapsedTime()</dv>
+<KitCanvas @ref="_kitCanvas" Playground="@_task.Playground" ToolBox="@_task.Toolbox" Parameters="@_task.Input.Concat(_task.Output)"></KitCanvas>
+
+
+@code {
+
+
+
+    private TaskComponent _task = default!;
+    private TaskStatusR _status = default;
+    private KitCanvas _kitCanvas = default!;
+    public JsonObject Toolbox;
+    public string[] Input;
+    public string[] Output;
+
+    [Parameter] public long TaskId { get; set; }
+    [Parameter] public long moduleId { get; set; }
+
+    private TimeSpan elapsedTime;
+    private CancellationTokenSource cancellationTokenSource;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        _status = await DbContext.TaskStatus.FirstOrDefaultAsync(x => x.TaskId == TaskId);
+        _task = await DbContext.TaskComponents
+            .Include(x => x.Values)
+            .Include(x => x.Attempts)
+            .Include(x => x.StatusR)
+            .FirstOrDefaultAsync(x => x.Id == TaskId);
+
+        if (_status.SolutionTime != null)
+        {
+            elapsedTime = _status.SolutionTime;
+        }
+        else
+        {
+            elapsedTime = TimeSpan.Zero;
+        }
+
+        StartTimer();
+    }
+
+
+    private async Task SaveAsync()
+    {
+        _task.Playground = await _kitCanvas.SaveAsync();
+        await DbContext.SaveChangesAsync();
+        // Snackbar.Add("Сохранено", Severity.Success);
+    }
+
+    private async Task RunAsync()
+    {
+      //  StopTimer();
+        await SaveAsync();
+        var result = await RunDialog<TaskRunnerDialog>();
+      //  StartTimer();
+    }
+
+    private async Task<TaskAttempt?> RunDialog<TDialog>()
+    where TDialog : ComponentBase
+    => await DialogService.RunDialog<TDialog, TaskAttempt>(
+        //  _task.Name,
+        new DialogParameters()
+                {
+                {nameof(TaskRunnerDialog.TaskC), _task},
+                {nameof(TaskRunnerDialog.Code), await _kitCanvas.GenerateAsync()}
+                }
+    );
+
+    public async Task<JsonObject> LoadJsonAsync(string filePath)
+    {
+        using (FileStream stream = File.OpenRead(filePath))
+        {
+            JsonObject toolbox = await JsonSerializer.DeserializeAsync<JsonObject>(stream);
+            return toolbox;
+        }
+    }
+
+    private void StartTimer()
+    {
+        cancellationTokenSource = new CancellationTokenSource();
+        Task.Run(async () =>
+        {
+            while (!cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                await Task.Delay(1000); // Обновление каждую секунду
+                elapsedTime = elapsedTime.Add(TimeSpan.FromSeconds(1));
+
+                if (_status.IsPassed == true) // Условие остановки
+                {
+                    StopTimer();
+                    break;
+                }
+                _status.SolutionTime = elapsedTime;
+                await DbContext.SaveChangesAsync();
+
+                // Обновление UI
+                InvokeAsync(StateHasChanged);
+            }
+        });
+    }
+
+    private string GetFormattedElapsedTime()
+    {
+        try
+        {
+            // Проверяем, что elapsedTime корректно инициализирован
+            if (elapsedTime != null)
+            {
+                return elapsedTime.ToString(@"hh\:mm\:ss");
+            }
+            else
+            {
+                return "00:00:00"; // Возвращаем значение по умолчанию, если elapsedTime не инициализирован
+            }
+        }
+        catch (FormatException ex)
+        {
+            // Логирование ошибки или обработка
+            Console.WriteLine($"Ошибка форматирования времени: {ex.Message}");
+            return "00:00:00"; // Возвращаем значение по умолчанию в случае ошибки
+        }
+    }
+
+    private void StopTimer()
+    {
+        if (cancellationTokenSource != null && !cancellationTokenSource.IsCancellationRequested)
+        {
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose(); // Освобождаем ресурсы
+        }
+    }
+
+    private void GoBack()
+    {
+        StopTimer();
+        Navigation.NavigateTo($"/module/{moduleId}");
+    }
+
+    public void Dispose()
+    {
+        StopTimer();
+    }
+    ///заметки <summary>
+    /// 1) Сделать ключи преподавателя на каждый год отдельные для допуска на задания по таймеру
+    /// 2) Доступ к графику после решения параграфа
+    /// 3) Выбор графика для параграфа (1\2\3.1\3.2\3.3) -> ввод таблицы данных -> просмотр результата
+    /// 4) График на котором можно показать все 3 графика одновременно.
+    /// 5) Сделать отдельный набор тулсов с готовыми функциями, их исп-е во время тестов будет отнимать быллы из max.
+    /// 6) Сделать автосейвы каждые 15 мин и вкладку в таблице для автосейвов.
+    /// </summary>
+}

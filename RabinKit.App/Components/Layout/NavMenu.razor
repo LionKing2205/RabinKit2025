@@ -1,0 +1,59 @@
+﻿@inject NavigationManager NavigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href=" ">RabinKit.App</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="task/1" Match="NavLinkMatch.Prefix">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Task1
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="task/2" Match="NavLinkMatch.Prefix">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Task2
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="task/3" Match="NavLinkMatch.Prefix">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Task3
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+
+
+    private void OnItemSelected(int id)
+    {
+        NavigationManager.NavigateTo($"/task/{id}");
+    }
+
+}
+
+@* <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="task/1" Match="NavLinkMatch.Prefix">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Task1
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="task/2" Match="NavLinkMatch.Prefix">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Task2
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="task/3" Match="NavLinkMatch.Prefix">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Task3
+            </NavLink>
+        </div>
+    </nav>
+</div> *@

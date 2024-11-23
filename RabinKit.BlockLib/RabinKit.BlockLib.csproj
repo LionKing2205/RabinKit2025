@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+	<PackageId>RabinKit.BlockLib</PackageId>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="BlocksBuilder\src\toolboxs\All.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="BlocksBuilder\src\toolboxs\All.js" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.8" />
+		<PackageReference Include="MudBlazor" Version="7.8.0" />
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Condition="$(Configuration) == 'Debug'" Command="npm run build" WorkingDirectory="BlocksBuilder" />
+		<Exec Condition="$(Configuration) == 'Release'" Command="npm run build" WorkingDirectory="BlocksBuilder" />
+	</Target>
+
+</Project>

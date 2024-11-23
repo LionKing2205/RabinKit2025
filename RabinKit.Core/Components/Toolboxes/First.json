@@ -1,0 +1,43 @@
+{
+  "kind": "categoryToolbox",
+  "contents": [
+    {
+      "kind": "category",
+      "name": "Математика",
+      "categorystyle": "math_category",
+      "contents": [
+        {
+          "kind": "block",
+          "type": "math_number",
+          "fields": {
+            "NUM": 123
+          }
+        },
+        {
+          "kind": "block",
+          "type": "math_arithmetic",
+          "fields": {
+            "OP": "ADD"
+          }
+        },
+        {
+          "kind": "block",
+          "type": "math_single",
+          "fields": {
+            "OP": "ROOT"
+          }
+        },
+        {
+          "kind": "block",
+          "type": "math_modulo"
+        }
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Переменные",
+      "categorystyle": "variable_category",
+      "custom": "VARIABLE"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+@using RabinKit.App.Services
+@using RabinKit.Core.Entities
+@* @using RabinKit.Core.Enums *@
+@using RabinKit.Core.Services
+@inject TaskRunner TaskRunner
+@inject ExceptionHandler ExceptionHandler 
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@TaskC.Name</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudOverlay Visible="@_isLoading" DarkBackground="true" Absolute="true">
+            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+        </MudOverlay>
+        <MudStack Spacing="3">
+            @foreach (var input in Values.Keys)
+            {
+                <MudTextField Disabled="_isLoading" T="string"
+                Label="@input"
+                Variant="Variant.Outlined"
+                TextChanged="value => Values[input] = value"
+                Value="@Values[input]"></MudTextField>
+            }
+        </MudStack>
+        <MudStack>
+            @if (attempt is not null)
+            {
+                @if (attempt.Result is not null)
+                {
+                    <MudTextField T="string" Label="Результат" Variant="Variant.Outlined" Text="@attempt.Result" AutoGrow />
+                    @if (attempt.IsPassed)
+                    {
+                        <MudTextField T="string" Label="Cтатус" Variant="Variant.Outlined" Text="Задача решена!" AutoGrow
+                        />
+                    }
+                    else
+                    {
+                        <MudTextField T="string" Label="Cтатус" Variant="Variant.Outlined" Text="Задача не решена" AutoGrow />
+                    }
+                }
+                   
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary"
+                   OnClick="() => ExceptionHandler.HandleAsync(RunAsync)"
+                   Variant="Variant.Filled">Запустить
+        </MudButton>
+       @*  <MudButton Color="Color.Primary" OnClick="@Cancel" Variant="Variant.Filled">Close</MudButton> *@
+    </DialogActions>
+</MudDialog>
+
+@* OnClick="() => ExceptionHandler.HandleAsync(RunAsync)" *@
+@code {
+    [Parameter] 
+    public TaskComponent TaskC { get; set; }
+
+    [Parameter]
+    public string Code { get; set; }
+
+    public Dictionary<string, string> Values { get; set; }
+
+    private bool _isLoading = false;
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private TaskAttempt attempt;
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        Values = TaskC.Attempts
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefault()
+            ?.Inputs!;
+
+        if (Values is null)
+        {
+            Values = new Dictionary<string, string>();
+
+            foreach (var input in TaskC.Input)
+            {
+                Values[input] = "";
+            }
+        }
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+    private async Task RunAsync()
+    {
+        _isLoading = true;
+        attempt = new TaskAttempt(
+            Code,
+            Values,
+            TaskC);
+
+        await TaskRunner.RunAsync(attempt);
+        
+        _isLoading = false;
+        //MudDialog.Close(attempt);
+    }
+    ///todo
+    ///добавить автоматическое удаление данных с ячейки пр нажатии на ячейку
+}
+

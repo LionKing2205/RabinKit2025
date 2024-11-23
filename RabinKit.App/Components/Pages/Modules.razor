@@ -1,0 +1,82 @@
+@page "/module/{moduleId:long}"
+
+@using RabinKit.Core.Entities
+@using Microsoft.EntityFrameworkCore
+@inject IDbContext DbContext
+
+
+<MudButton Variant="Variant.Filled" Href="/" Color="Color.Primary">Назад</MudButton>
+<MudContainer>
+    <MudTable Items="@tasks" Striped="true" Hover="true">
+        <HeaderContent>
+            <MudTh Width="200px">Открыть</MudTh>
+            <MudTh>Задача</MudTh>
+            <MudTh>Статус</MudTh>
+            <MudTh>Время решения</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+                <MudTd>
+                    <MudButton Class="no-wrap" Variant="Variant.Filled" Color="Color.Primary" Href="@($"/module/{moduleId}/{moduleId * 10 + @context.TaskNumber}")">
+                        @($"Задача {moduleId}.{@context.TaskNumber}")
+                    </MudButton>
+                </MudTd>
+                <MudTd>@context.Name</MudTd>
+                <MudTd>@context.IsPassed</MudTd>
+                <MudTd>@context.SolutionTime</MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudContainer>
+
+
+    @code {
+    private List<TaskComponent> _task = default!;
+    private List<TaskStatusR> _status = default;
+    private List<TaskItem> tasks = new List<TaskItem>();
+    [Parameter] public long moduleId { get; set; }
+    private int taskCount;
+
+    private long a;
+    private long b;
+    protected override async Task OnInitializedAsync()
+    {
+        a = moduleId * 10 - 1;
+        b = moduleId * 10 + 10;
+        taskCount = DbContext.TaskComponents
+                            .Count(e => e.Id > a && e.Id < b);
+
+        _status = await DbContext.TaskStatus.ToListAsync();
+        _task = await DbContext.TaskComponents.ToListAsync();
+
+        for (int i = 1; i <= taskCount; i++)
+        {
+            tasks.Add(new TaskItem
+                {
+                    TaskNumber = i,
+                    Name = _task[i - 1].Name,
+                    IsPassed = PassedText(_status[i - 1].IsPassed), // Пример статуса
+                    SolutionTime = _status[i - 1].SolutionTime.ToString(@"hh\:mm\:ss") // Пример времени решения
+                });
+        }
+    }
+
+    private string PassedText(bool isPassed)
+    {
+        return isPassed ? "Решено" : "Не решено";
+    }
+
+    // private void NavigateToTask(long moduleId, int taskNumber)
+    // {
+    //     NavigationManager.NavigateTo($"/module/{moduleId}/{moduleId * 10 + taskNumber}");
+    // }
+
+    public class TaskItem
+    {
+        public int TaskNumber { get; set; }
+        public string Name { get; set; }
+        public string IsPassed { get; set; }
+        public string SolutionTime { get; set; }
+    }
+}
+
+
+

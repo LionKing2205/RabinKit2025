@@ -1,0 +1,40 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="MyCustomTheme" IsDarkMode="true" />
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+
+<MudLayout Class="h100">
+    <MudAppBar Color="Color.Primary">
+        <SectionOutlet SectionId="TopbarSection" />
+    </MudAppBar>
+    <MudMainContent Class="h100">
+        <MudPaper Style="display: contents">
+            @Body
+        </MudPaper>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    internal static object TopbarSection = new();
+    MudTheme MyCustomTheme = new MudTheme()
+        {
+            PaletteLight = new PaletteLight()
+            {
+                Primary = Colors.Orange.Default,
+                Secondary = Colors.Green.Accent4,
+                AppbarBackground = Colors.Red.Default,
+            },
+            PaletteDark = new PaletteDark()
+            {
+                Primary = Colors.Orange.Default
+            },
+
+            LayoutProperties = new LayoutProperties()
+            {
+                DrawerWidthLeft = "260px",
+                DrawerWidthRight = "300px"
+            }
+        };
+}
