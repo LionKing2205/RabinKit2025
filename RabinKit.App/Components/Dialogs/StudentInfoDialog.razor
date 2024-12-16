@@ -1,0 +1,76 @@
+@using RabinKit.App.Services
+@using RabinKit.Core.Entities
+@using RabinKit.Core.Services
+@using Microsoft.EntityFrameworkCore
+@inject IDbContext DbContext
+
+
+<MudDialog>
+    <DialogContent>
+        <MudStack>
+            <MudTextField T="string"
+            Label="ФИО студента"
+            Variant="Variant.Outlined"
+            @bind-Value="_student.Name">
+            </MudTextField>
+            <MudTextField T="string"
+            Label="Группа студента"
+            Variant="Variant.Outlined"
+            @bind-Value="_student.Group">
+            </MudTextField>
+            <MudTextField T="string"
+            Label="Учебный год"
+            Variant="Variant.Outlined"
+            @bind-Value="_student.Year">
+            </MudTextField>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="SaveStudent" Color="Color.Primary">Сохранить</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    private Student _student = new Student();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Загрузка существующего студента по ID, если он передан
+        var existingStudent = await DbContext.Students.FirstOrDefaultAsync();
+        if (existingStudent != null)
+        {
+            _student = existingStudent;
+        }
+    }
+
+    private async Task SaveStudent()
+    {
+        // Проверяем, существует ли студент
+        var existingStudent = await DbContext.Students.FirstOrDefaultAsync();
+
+            if (existingStudent != null)
+            {
+                // Обновляем свойства
+                existingStudent.Name = _student.Name;
+                existingStudent.Group = _student.Group;
+                existingStudent.Year = _student.Year;
+
+                // Сохраняем изменения
+                await DbContext.SaveChangesAsync();
+            }
+            else
+            {
+                // Если студент не найден, создаем новый
+                var newStudent = new Student
+                    {
+                        Name = _student.Name,
+                        Group = _student.Group,
+                        Year = _student.Year
+                    };
+
+                DbContext.Students.Add(newStudent);
+                await DbContext.SaveChangesAsync();
+            }
+    }
+}

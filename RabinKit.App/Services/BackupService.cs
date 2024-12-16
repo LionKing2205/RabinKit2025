@@ -34,71 +34,71 @@ public class BackupService
         _exceptionHandler = exceptionHandler;
     }
 
-    //public async Task ExportAsync()
-    //{
-    //    await _exceptionHandler.HandleAsync(
-    //        async () =>
-    //        {
-    //            await _context.Database.ExecuteSqlRawAsync("VACUUM;");
-    //            await _context.Database.ExecuteSqlRawAsync("PRAGMA wal_checkpoint(TRUNCATE)");
-    //            await ReleaseAsync();
+    public async Task ExportAsync()
+    {
+        await _exceptionHandler.HandleAsync(
+            async () =>
+            {
+                await _context.Database.ExecuteSqlRawAsync("VACUUM;");
+                await _context.Database.ExecuteSqlRawAsync("PRAGMA wal_checkpoint(TRUNCATE)");
+                await ReleaseAsync();
 
-    //            File.Copy(DbFileName, BackupFileName, overwrite: true);
+                File.Copy(DbFileName, BackupFileName, overwrite: true);
 
-    //            await using var stream = File.OpenRead(BackupFileName);
+                await using var stream = File.OpenRead(BackupFileName);
 
-    //            var result = await FileSaver.SaveAsync("data.backup", stream);
-    //        },
-    //        catchAll: true,
-    //        finallyFunc: () => _manager.Refresh(true));
-    //}
+                var result = await FileSaver.SaveAsync("data.backup", stream);
+            },
+            catchAll: true,
+            finallyFunc: () => _manager.Refresh(true));
+    }
 
-    //public async Task ImportAsync(Stream fileContent)
-    //{
-    //    await _exceptionHandler.HandleAsync(
-    //        async () =>
-    //        {
-    //            File.Delete(BackupFileName);
-    //            File.Copy(DbFileName, BackupFileName, overwrite: true);
+    public async Task ImportAsync(Stream fileContent)
+    {
+        await _exceptionHandler.HandleAsync(
+            async () =>
+            {
+                File.Delete(BackupFileName);
+                File.Copy(DbFileName, BackupFileName, overwrite: true);
 
-    //            await _context.Database.EnsureDeletedAsync();
-    //            await ReleaseAsync();
+                await _context.Database.EnsureDeletedAsync();
+                await ReleaseAsync();
 
-    //            await using (var dbFileStream = File.OpenWrite(DbFileName))
-    //                await fileContent.CopyToAsync(dbFileStream);
+                await using (var dbFileStream = File.OpenWrite(DbFileName))
+                    await fileContent.CopyToAsync(dbFileStream);
 
-    //            await using var scope = _factory.CreateAsyncScope();
+                await using var scope = _factory.CreateAsyncScope();
 
-    //            _ = await scope.ServiceProvider.GetRequiredService<EfContext>().Database
-    //                .GetPendingMigrationsAsync();
-    //            await scope.ServiceProvider.GetRequiredService<DbMigrator>().MigrateAsync();
-    //        },
-    //        catchFunc: () =>
-    //        {
-    //            if (File.Exists(BackupFileName))
-    //                File.Move(BackupFileName, DbFileName, overwrite: true);
-    //        },
-    //        finallyFunc: () => _manager.NavigateTo("/", true),
-    //        catchAll: true);
-    //}
+                _ = await scope.ServiceProvider.GetRequiredService<EfContext>().Database
+                    .GetPendingMigrationsAsync();
+                await scope.ServiceProvider.GetRequiredService<DbMigrator>().MigrateAsync();
+            },
+            catchFunc: () =>
+            {
+                if (File.Exists(BackupFileName))
+                    File.Move(BackupFileName, DbFileName, overwrite: true);
+            },
+            finallyFunc: () => _manager.NavigateTo("/", true),
+            catchAll: true);
+    }
 
-    //public async Task ResetAsync()
-    //{
-    //    await _exceptionHandler.HandleAsync(async () =>
-    //    {
-    //        await ReleaseAsync();
+    public async Task ResetAsync()
+    {
+        await _exceptionHandler.HandleAsync(async () =>
+        {
+            await ReleaseAsync();
 
-    //        File.Copy(DbFileName, BackupFileName, overwrite: true);
+            File.Copy(DbFileName, BackupFileName, overwrite: true);
 
-    //        await using (var scope = _factory.CreateAsyncScope())
-    //        {
-    //            await scope.ServiceProvider.GetRequiredService<EfContext>().Database.EnsureDeletedAsync();
-    //            await scope.ServiceProvider.GetRequiredService<DbMigrator>().MigrateAsync();
-    //        }
+            await using (var scope = _factory.CreateAsyncScope())
+            {
+                await scope.ServiceProvider.GetRequiredService<EfContext>().Database.EnsureDeletedAsync();
+                await scope.ServiceProvider.GetRequiredService<DbMigrator>().MigrateAsync();
+            }
 
-    //        _manager.NavigateTo("/", true);
-    //    });
-    //}
+            _manager.NavigateTo("/", true);
+        });
+    }
 
     private async Task ReleaseAsync()
     {

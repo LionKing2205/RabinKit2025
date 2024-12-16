@@ -1,4 +1,55 @@
 ﻿@page "/setting"
 
-<h1>Weather</h1>
+@using RabinKit.App.Services
+@inject BackupService BackupService
+
+<MudButton Variant="Variant.Filled" Href="/" Color="Color.Primary">Назад</MudButton>
+<MudContainer Class="d-flex flex-wrap">
+    <MudPaper Class="pa-4 ma-4" Style="width: 500px;">
+        <h1>Экспорт</h1>
+        <MudButton 
+            Variant="Variant.Filled"
+            Color="Color.Primary"
+            StartIcon="@Icons.Material.Filled.CloudDownload"
+            OnClick="@ExportAsync">Экспортировать</MudButton>
+    </MudPaper>
+
+    <MudPaper Class="pa-4 ma-4" Style="width: 500px;">
+        <h1>Импорт</h1>
+        <MudFileUpload T="IBrowserFile" Accept=".backup" FilesChanged="UploadFile">
+            <ActivatorContent>
+                <MudButton HtmlTag="label"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.CloudUpload">
+                    Импортировать
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+    </MudPaper>
+
+    <MudPaper Class="pa-4 ma-4" Style="width: 500px;">
+        <h1>Сброс</h1>
+        <MudButton 
+            Variant="Variant.Filled"
+            Color="Color.Primary"
+            StartIcon="@Icons.Material.Filled.DeleteForever"
+            OnClick="@ResetAsync">Сбросить</MudButton>
+    </MudPaper>
+</MudContainer>
+
+
+@code {
+    private async Task UploadFile(IBrowserFile file)
+    {
+        await BackupService.ImportAsync(file.OpenReadStream());
+    }
+
+    private async Task ExportAsync(MouseEventArgs obj)
+        => await BackupService.ExportAsync();
+
+    private async Task ResetAsync(MouseEventArgs obj)
+        => await BackupService.ResetAsync();
+
+}
 

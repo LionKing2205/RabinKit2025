@@ -38,7 +38,7 @@ namespace RabinKit.Database
             _logger.LogInformation("UpdateDatabase:{operationId}: starting...", operationId);
             try
             {
-                await _documentDbContext.Database.MigrateAsync().ConfigureAwait(false);
+                await _documentDbContext.Database.MigrateAsync().ConfigureAwait(false); //fix and restore
                 await _dbSeeder.SeedAsync();
                 _logger.LogInformation("UpdateDatabase:{operationId}: successfully done", operationId);
             }

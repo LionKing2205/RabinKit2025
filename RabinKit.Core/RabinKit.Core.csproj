@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Toolboxes\FirstPrime.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Components\Descriptions\11.md" />
     <None Remove="Components\Descriptions\12.md" />
     <None Remove="Components\Descriptions\13.md" />
@@ -15,7 +19,8 @@
     <None Remove="Components\Descriptions\16.md" />
     <None Remove="Components\Descriptions\17.md" />
     <None Remove="Components\Toolboxes\All.json" />
-    <None Remove="Components\Toolboxes\First.json" />
+    <None Remove="Components\Toolboxes\FirstFull.json" />
+    <None Remove="Components\Toolboxes\FirstPrime.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,7 +32,9 @@
     <EmbeddedResource Include="Components\Descriptions\16.md" />
     <EmbeddedResource Include="Components\Descriptions\17.md" />
     <EmbeddedResource Include="Components\Toolboxes\All.json" />
-    <EmbeddedResource Include="Components\Toolboxes\First.json" />
+    <EmbeddedResource Include="Components\Toolboxes\FirstBegin.json" />
+    <EmbeddedResource Include="Components\Toolboxes\FirstFull.json" />
+    <EmbeddedResource Include="Components\Toolboxes\FirstPrime.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,8 +42,11 @@
     <PackageReference Include="IronPython.StdLib" Version="3.4.1" />
     <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
 	  <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.0" />
 	  <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.0" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	  <PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>

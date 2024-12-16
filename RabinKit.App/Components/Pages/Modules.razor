@@ -4,7 +4,24 @@
 @using Microsoft.EntityFrameworkCore
 @inject IDbContext DbContext
 
-
+<SectionContent SectionId="@Layout.MainLayout.TopbarSection">
+    @switch (moduleId)
+    {
+        case 1:
+            <h3 class="text-center" Style="width: 100%;">Шифрование сообщения законным пользователем</h3>
+            break;
+        case 2:
+            <h3 class="text-center" Style="width: 100%;">Расшифровка сообщения законным пользователем</h3>
+            break;
+        case 3:
+            <h3 class="text-center" Style="width: 100%;">Атака на криптографическую систему</h3>
+            break;
+        default:
+            <h3 class="text-center" Style="width: 100%;">Неверный модуль</h3>
+            ;
+            break;
+    }
+</SectionContent>
 <MudButton Variant="Variant.Filled" Href="/" Color="Color.Primary">Назад</MudButton>
 <MudContainer>
     <MudTable Items="@tasks" Striped="true" Hover="true">
@@ -15,20 +32,20 @@
             <MudTh>Время решения</MudTh>
         </HeaderContent>
         <RowTemplate>
-                <MudTd>
-                    <MudButton Class="no-wrap" Variant="Variant.Filled" Color="Color.Primary" Href="@($"/module/{moduleId}/{moduleId * 10 + @context.TaskNumber}")">
-                        @($"Задача {moduleId}.{@context.TaskNumber}")
-                    </MudButton>
-                </MudTd>
-                <MudTd>@context.Name</MudTd>
-                <MudTd>@context.IsPassed</MudTd>
-                <MudTd>@context.SolutionTime</MudTd>
+            <MudTd>
+                <MudButton Class="no-wrap" Variant="Variant.Filled" Color="Color.Primary" Href="@($"/module/{moduleId}/{moduleId * 10 + @context.TaskNumber}")">
+                    @($"Задача {moduleId}.{@context.TaskNumber}")
+                </MudButton>
+            </MudTd>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>@context.IsPassed</MudTd>
+            <MudTd>@context.SolutionTime</MudTd>
         </RowTemplate>
     </MudTable>
 </MudContainer>
 
 
-    @code {
+@code {
     private List<TaskComponent> _task = default!;
     private List<TaskStatusR> _status = default;
     private List<TaskItem> tasks = new List<TaskItem>();
@@ -49,13 +66,16 @@
 
         for (int i = 1; i <= taskCount; i++)
         {
-            tasks.Add(new TaskItem
-                {
-                    TaskNumber = i,
-                    Name = _task[i - 1].Name,
-                    IsPassed = PassedText(_status[i - 1].IsPassed), // Пример статуса
-                    SolutionTime = _status[i - 1].SolutionTime.ToString(@"hh\:mm\:ss") // Пример времени решения
-                });
+            if (!_task[i - 1].IsTest)
+            {
+                tasks.Add(new TaskItem
+                    {
+                        TaskNumber = i,
+                        Name = _task[i - 1].Name,
+                        IsPassed = PassedText(_status[i - 1].IsPassed), // Пример статуса
+                        SolutionTime = _status[i - 1].SolutionTime.ToString(@"hh\:mm\:ss") // Пример времени решения
+                    });
+            }
         }
     }
 

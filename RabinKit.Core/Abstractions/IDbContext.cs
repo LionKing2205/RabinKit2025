@@ -8,6 +8,8 @@ namespace RabinKit.Core.Abstractions
     /// </summary>
     public interface IDbContext
     {
+        public DbSet<Student> Students { get; set; }
+
         public DbSet<TaskComponent> TaskComponents { get; }
 
         public DbSet<TaskAttempt> TaskAttempts { get; }

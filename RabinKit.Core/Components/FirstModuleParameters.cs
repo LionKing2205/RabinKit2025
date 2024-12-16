@@ -13,7 +13,7 @@ namespace RabinKit.Core.Components
                 (1,numberCounter,
                 "Разработать функцию для дискретного возведения в квадрат по модулю",
                 ["m", "n"],["c"],
-                "First",
+                "FirstBegin",
                 [
                     new TestValuesSet(
                     InputVars: new
@@ -30,7 +30,7 @@ namespace RabinKit.Core.Components
                 (1,numberCounter,
                 "Разработать блочную программу проверки числа на простоту тестом Ферми",
                 ["p"],["is_prime"],
-                "All",
+                "FirstPrime",
                 [
                 new TestValuesSet(
                     InputVars: new
@@ -55,7 +55,7 @@ namespace RabinKit.Core.Components
                 (1,numberCounter,
                 "Разработать блочную программу проверки числа на простоту тестом Миллера-Рабина",
                 ["p"],["is_prime"],
-                "All",
+                "FirstPrime",
                 [
                 new TestValuesSet(
                     InputVars: new
@@ -89,7 +89,7 @@ namespace RabinKit.Core.Components
                 (1,numberCounter,
                 "Разработать генератор ключа для криптосистемы Рабина",
                 ["bit_length"],["p", "q"],
-                "All",
+                "FirstPrime",
                 [
                     //new TestValuesSet(
                     //InputVars: new
@@ -106,7 +106,7 @@ namespace RabinKit.Core.Components
                 (1,numberCounter,
                 "Зашифровать произвольное сообщение по алгоритму Рабина, на основе ключей, полученных из п.4",
                 ["p", "q", "m"],["crc", "c"],
-                "All",
+                "FirstFull",
                 [
                     new TestValuesSet(
                     InputVars: new
@@ -123,9 +123,9 @@ namespace RabinKit.Core.Components
                 ],
                 false),
                 (1,numberCounter,
-                "Зашифровать произвольное сообщение по алгоритму Рабина, предварительно сгенерировав ключ заданной битовой длины и создав отдельную функцию для проверки числа на простоту",
+                "Зашифровать произвольное сообщение по алгоритму Рабина",
                 ["m", "l"],["p","q","crc", "c"],
-                "All",
+                "FirstFull",
                 [
                     new TestValuesSet(
                     InputVars: new
@@ -141,7 +141,7 @@ namespace RabinKit.Core.Components
                         crc = 0
                     }),
                 ],
-                false),
+                true),
             };
     }
 }

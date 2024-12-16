@@ -1,15 +1,241 @@
 ﻿@page "/"
+@using RabinKit.Core.Entities
+@using Microsoft.EntityFrameworkCore
+@using RabinKit.App.GAuthenticator
+@using RabinKit.App.Components.Dialogs
+@inject IDbContext DbContext
+@inject IDialogService DialogService
 
-<MudContainer>
-    <MudContainer>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/module/1">
-            Go to Module 1
-        </MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/module/2">
-            Go to Module 2
-        </MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/module/3">
-            Go to Module 3
-        </MudButton>
+<SectionContent SectionId="@Layout.MainLayout.TopbarSection">
+    <MudText Align="Align.Center" Typo="Typo.h3" Style="width: 100%;">
+        Криптографическая система Рабина
+    </MudText>
+    @if (student != null){
+        <MudText Align="Align.Right" Typo="Typo.h5" Style="width: 100%;">
+            @($"{student.Name} {student.Group} {student.Year}")
+        </MudText>
+    }
+</SectionContent>
+<br>
+@if (_validStudentData == false)
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@GetUserData">
+        Заполните свои данные
+    </MudButton>
+}
+else
+{
+    <MudContainer Class="d-flex flex-row">
+        @foreach (var module in modules)
+        {
+            <MudItem Class="mb-2 mx-2" Style="width: 500px;">
+                <MudPaper Class="pa-2 d-flex flex-column align-items-center" Elevation="4">
+                    <MudText Typo="Typo.h3" Align="Align.Center" Style="margin-bottom: 0.5rem;">
+                        @($"Модуль {module.Module}")
+                    </MudText>
+                    <MudText Typo="Typo.h4" Align="Align.Center" Style="margin-bottom: 0.4rem;">
+                        @module.Description
+                    </MudText>
+                    <MudText Align="Align.Center" Style="margin-bottom: 0.3rem;">
+                        Решено @module.Solved из @module.Total
+                    </MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href=@($"/module/{module.Module}") Style="width: 100%; height: 80px;">
+                        Начать
+                    </MudButton>
+                    <br><br><br>
+                    @if (module.TestId != null && module.TestId != 0)
+                    {
+                        <MudText Typo="Typo.h4" Align="Align.Center" Style="margin-bottom: 0.5rem;">
+                            Итоговое тестирование по модулю
+                        </MudText>
+
+                        <MudTextField @bind-Value="inputCode"
+                        Label="Введите код"
+                        Variant="Variant.Outlined"
+                        Margin="Margin.Normal" />
+
+                        <MudButton Class="no-wrap"
+                        Variant="Variant.Filled"
+                        Color="Color.Primary"
+                        OnClick="@CheckCode"
+                        Disabled="@(!isButtonDisabled)">
+                            Проверить код
+                        </MudButton>
+                        <br>
+                        <MudButton Class="no-wrap"
+                        Variant="Variant.Filled"
+                        Color="Color.Primary"
+                        Href=@($"/module/{module.Module}/{module.TestId}")
+                        Disabled="@(!isCodeValid || isButtonDisabled)">
+                            Начать тест
+                        </MudButton>
+                        @* <MudButton Class="no-wrap" Variant="Variant.Filled" Color="Color.Primary" Href=@($"/module/{module.Module}/{module.TestId}")>
+                        Начать тест
+                    </MudButton>  *@
+                        @* <MudButton Class="no-wrap"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Href=@($"/module/{module.Module}/{module.TestId}")
+                               Disabled="@(@module.Solved != @module.Total)">
+                        Начать тест
+                    </MudButton> *@
+                        <MudText>@module.TestPassed</MudText>
+                        <MudText>Время решения: @module.TestSolutionTime</MudText>
+                    }
+                </MudPaper>
+            </MudItem>
+        }
     </MudContainer>
-</MudContainer>
+}
+
+<MudItem Style="position: absolute; top: 86px; right: 16px;">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/setting">
+        Импорт/Экспорт
+    </MudButton>
+</MudItem>
+
+@code {
+    private List<ModuleInfo> modules;
+    private string inputCode;
+    private bool isCodeValid;
+    private bool isButtonDisabled = true;
+    private System.Timers.Timer? timer;
+    private Student? student;
+    private bool _validStudentData = false;
+
+    private async Task CheckCode()
+    {
+        var authenticator = new Authenticator();
+        isCodeValid =  authenticator.Authentication(inputCode);
+
+        if (isCodeValid) { isButtonDisabled = false; StartTimer(); }
+        //else добавить всплывающее сообщение
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var moduleTasks = new List<Task<ModuleInfo>>
+            {
+                GetModuleInfo(10, 19),
+                GetModuleInfo(20, 29),
+                GetModuleInfo(30, 39)
+            };
+        modules = new List<ModuleInfo>(await Task.WhenAll(moduleTasks));
+
+        student = await DbContext.Students.FirstOrDefaultAsync();
+        student = student;
+        if (student == null ||
+            string.IsNullOrEmpty(student.Name) ||
+            string.IsNullOrEmpty(student.Group) ||
+            string.IsNullOrEmpty(student.Year))
+        {
+            await GetUserData();
+        }
+        else
+        {
+            _validStudentData = true;
+        }
+    }
+    private async Task GetUserData()
+    {
+        IDialogReference dialog = await DialogService.ShowAsync<StudentInfoDialog>(
+            "Заполните данные",
+            new DialogOptions
+                {
+                    MaxWidth = MaxWidth.Small,
+                    FullWidth = true,
+                    CloseButton = true,
+                });
+        var dialogResult = await dialog.Result;
+        if (dialogResult.Canceled)
+        {
+            student = await DbContext.Students.FirstOrDefaultAsync();
+            if (student == null ||
+                string.IsNullOrEmpty(student.Name) ||
+                string.IsNullOrEmpty(student.Group) ||
+                string.IsNullOrEmpty(student.Year))
+            {
+                await GetUserData();
+            }
+            else
+            {
+                _validStudentData = true;
+            }
+        }
+    }
+
+    private async Task<ModuleInfo> GetModuleInfo(int startId, int endId)
+    {
+        var solvedCount = await DbContext.TaskStatus
+            .Where(e => e.TaskId >= startId && e.TaskId <= endId && e.IsPassed)
+            .CountAsync();
+        var totalCount = await DbContext.TaskComponents
+            .Where(e => e.Id >= startId && e.Id <= endId)
+            .CountAsync();
+        var testId = await DbContext.TaskComponents
+            .Where(e => e.IsTest == true && e.Id >= startId && e.Id <= endId)
+            .Select(e => e.Id)
+            .FirstOrDefaultAsync();
+        var Passed = await DbContext.TaskStatus
+            .Where(e => e.TaskId == testId && e.TaskId >= startId && e.TaskId <= endId && e.IsPassed)
+            .Select(e => e.IsPassed)
+            .FirstOrDefaultAsync();
+        string testPassed;
+        if (Passed)
+        {
+            testPassed = "Тест решен";
+        }
+        else
+        {
+            testPassed = "Тест не решен";
+        }
+        var testSolutionTime = await DbContext.TaskStatus
+            .Where(e => e.TaskId == testId)
+            .Select(e => e.SolutionTime)
+            .FirstOrDefaultAsync();
+
+
+        return new ModuleInfo
+        {
+            Module = (startId / 10),
+            Description = startId == 10 ? "Шифрование сообщения законным пользователем" : 
+                         startId == 20 ? "Расшифровка сообщения законным пользователем" : 
+                         "Атака на криптографическую систему Рабина",
+            Solved = solvedCount,
+            Total = totalCount,
+            TestId = testId,
+            TestPassed = testPassed,
+            TestSolutionTime = testSolutionTime
+        };
+    }
+
+    private class ModuleInfo
+    {
+        public int Module { get; set; }
+        public string Description { get; set; }
+        public int Solved { get; set; }
+        public int Total { get; set; }
+        public long TestId { get; set; }
+        public string? TestPassed { get; set; }
+        public TimeSpan? TestSolutionTime { get; set; }
+    }
+
+    private void StartTimer()
+    {
+        timer = new System.Timers.Timer(60000); 
+        timer.Elapsed += OnTimerElapsed;
+        timer.AutoReset = false;
+        timer.Start();
+    }
+
+    private void OnTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+    {
+        isButtonDisabled = true;
+        timer?.Stop();
+        timer?.Dispose();
+        timer = null;
+
+        InvokeAsync(StateHasChanged); 
+    }
+}
+

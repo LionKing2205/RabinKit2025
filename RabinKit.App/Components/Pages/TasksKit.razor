@@ -18,23 +18,32 @@
 @inject ISnackbar Snackbar  *@
 
 <SectionContent SectionId="@Layout.MainLayout.TopbarSection">
-    @_task.Name
+    <h3 class="text-center" Style="width: 100%;">@_task.Name</h3>
 </SectionContent>
-<MudButton OnClick="@GoBack" Color="Color.Primary">Назад</MudButton>
-<MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Inherit" OnClick="@SaveAsync">
-    Сохранить
-</MudButton>
-<MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Inherit" OnClick="@RunAsync">
-    Запустить
-</MudButton>
-<dv>Время решения: @GetFormattedElapsedTime()</dv>
+<MudGrid>
+    <MudItem xs="12" class="d-flex align-items-center justify-between">
+        <div class="d-flex">
+            <MudButton OnClick="@GoBack" Color="Color.Inherit">Назад</MudButton>
+            <MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Inherit" OnClick="@SaveAsync">
+                Сохранить
+            </MudButton>
+            <MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Primary" OnClick="@RunAsync">
+                Запустить
+            </MudButton>
+        </div>
+        <span class="mx-auto">Время решения: @GetFormattedElapsedTime()</span>
+        <MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Inherit" OnClick="@ViewCode">
+            Код
+        </MudButton>
+        <MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Inherit" OnClick="@ViewDescription">
+            Описание
+        </MudButton>
+    </MudItem>
+</MudGrid>
 <KitCanvas @ref="_kitCanvas" Playground="@_task.Playground" ToolBox="@_task.Toolbox" Parameters="@_task.Input.Concat(_task.Output)"></KitCanvas>
 
 
 @code {
-
-
-
     private TaskComponent _task = default!;
     private TaskStatusR _status = default;
     private KitCanvas _kitCanvas = default!;
@@ -47,6 +56,7 @@
 
     private TimeSpan elapsedTime;
     private CancellationTokenSource cancellationTokenSource;
+    private bool _isFirstDescriptionOpen = false;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -66,10 +76,28 @@
         {
             elapsedTime = TimeSpan.Zero;
         }
-
         StartTimer();
     }
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _task.Playground is null) //TODO remove && _task.Playground is null !!!
+        {
+            _isFirstDescriptionOpen = true;
+            await ViewDescription();
 
+        }
+    }
+
+    private async Task ViewCode()
+    {
+        await ShowDialogAsync("code");
+    }
+
+    private async Task ViewDescription()
+    {
+        await ShowDialogAsync("description");
+    }
 
     private async Task SaveAsync()
     {
@@ -80,22 +108,78 @@
 
     private async Task RunAsync()
     {
-      //  StopTimer();
+        //  
         await SaveAsync();
-        var result = await RunDialog<TaskRunnerDialog>();
-      //  StartTimer();
+        await ShowDialogAsync("task");
+        //await RunDialog<TaskRunnerDialog>();
+        //  StartTimer();
     }
 
-    private async Task<TaskAttempt?> RunDialog<TDialog>()
-    where TDialog : ComponentBase
-    => await DialogService.RunDialog<TDialog, TaskAttempt>(
-        //  _task.Name,
-        new DialogParameters()
+    private async Task ShowDialogAsync(string type)
+    {
+        switch (type)
+        {
+            case "description":
+                IDialogReference dialog = await DialogService.ShowAsync<DescriptionDialog>(
+                    _task.Name,
+                    new DialogParameters
+                        {
+                { nameof(DescriptionDialog.TaskC), _task },
+                        },
+                    new DialogOptions
+                        {
+                            MaxWidth = MaxWidth.Medium,
+                            FullWidth = true,
+                            CloseButton = true,
+                        });
+
+                if (_isFirstDescriptionOpen)
                 {
-                {nameof(TaskRunnerDialog.TaskC), _task},
-                {nameof(TaskRunnerDialog.Code), await _kitCanvas.GenerateAsync()}
+                    var dialogResult = await dialog.Result;
+                    if (dialogResult.Canceled)
+                    {
+                        _isFirstDescriptionOpen = false;
+                    }
                 }
-    );
+                break;
+
+            case "task":
+                await DialogService.ShowAsync<TaskRunnerDialog>(
+                    _task.Name,
+                    new DialogParameters
+                            {
+                { nameof(TaskRunnerDialog.TaskC), _task },
+                { nameof(TaskRunnerDialog.Code), await _kitCanvas.GenerateAsync() }
+                            },
+                    new DialogOptions
+                        {
+                            MaxWidth = MaxWidth.Small,
+                            FullWidth = true,
+                            CloseButton = true,
+                        });
+                break;
+
+            case "code":
+                await DialogService.ShowAsync<CodeDialog>(
+                    _task.Name,
+                    new DialogParameters
+                        {
+                { nameof(TaskRunnerDialog.TaskC), _task },
+                { nameof(TaskRunnerDialog.Code), await _kitCanvas.GenerateAsync() }
+                        },
+                    new DialogOptions
+                        {
+                            MaxWidth = MaxWidth.Small,
+                            FullWidth = true,
+                            CloseButton = true,
+                        });
+                break;
+
+            default:
+                break;
+        }
+
+    }
 
     public async Task<JsonObject> LoadJsonAsync(string filePath)
     {
@@ -113,19 +197,22 @@
         {
             while (!cancellationTokenSource.Token.IsCancellationRequested)
             {
-                await Task.Delay(1000); // Обновление каждую секунду
-                elapsedTime = elapsedTime.Add(TimeSpan.FromSeconds(1));
-
-                if (_status.IsPassed == true) // Условие остановки
+                if (!_isFirstDescriptionOpen)
                 {
-                    StopTimer();
-                    break;
-                }
-                _status.SolutionTime = elapsedTime;
-                await DbContext.SaveChangesAsync();
+                    await Task.Delay(1000); // Обновление каждую секунду
+                    elapsedTime = elapsedTime.Add(TimeSpan.FromSeconds(1));
 
-                // Обновление UI
-                InvokeAsync(StateHasChanged);
+                    if (_status.IsPassed == true) // Условие остановки
+                    {
+                        StopTimer();
+                        break;
+                    }
+                    _status.SolutionTime = elapsedTime;
+                    await DbContext.SaveChangesAsync();
+
+                    // Обновление UI
+                    InvokeAsync(StateHasChanged);
+                 }
             }
         });
     }

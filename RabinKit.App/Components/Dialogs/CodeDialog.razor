@@ -1,0 +1,26 @@
+@using RabinKit.App.Services
+@using RabinKit.Core.Entities
+@using RabinKit.Core.Services
+@inject TaskRunner TaskRunner
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@TaskC.Name</MudText>
+    </TitleContent>
+    <DialogContent>
+            <MudMarkdown Value="@Content" CodeBlockTheme="CodeBlockTheme.GithubDark"></MudMarkdown>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public TaskComponent TaskC { get; set; }
+
+    [Parameter]
+    public string Code { get; set; }
+
+    private string Content => $"```python\n" +
+                          $"{TaskRunner.PrepareScriptForDisplay(Code)}\n" +
+                          $"```\n";
+
+}

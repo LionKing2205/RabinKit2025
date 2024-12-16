@@ -39,7 +39,7 @@ namespace RabinKit.App
             builder.Services.AddMudMarkdownServices();
             builder.UseMauiCommunityToolkit();
             builder.Services.AddScoped<ExceptionHandler>();
-
+            builder.Services.AddScoped<BackupService>();
 
 
             if (isDevelopment)

@@ -13,7 +13,7 @@
         <MudOverlay Visible="@_isLoading" DarkBackground="true" Absolute="true">
             <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
         </MudOverlay>
-        <MudStack Spacing="3">
+        <MudStack Spacing="1">
             @foreach (var input in Values.Keys)
             {
                 <MudTextField Disabled="_isLoading" T="string"

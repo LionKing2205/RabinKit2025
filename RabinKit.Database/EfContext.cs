@@ -36,7 +36,8 @@ namespace RabinKit.Database
             _domainEventsDispatcher = domainEventsDispatcher ?? throw new ArgumentNullException(nameof(domainEventsDispatcher));
         }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
+        /// <inheritdoc />
+        public DbSet<Student> Students { get; set; }
         /// <inheritdoc />
         public DbSet<TaskComponent> TaskComponents { get; set; }
 

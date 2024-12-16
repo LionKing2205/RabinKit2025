@@ -1,0 +1,26 @@
+@using RabinKit.App.Services
+@using RabinKit.Core.Entities
+@using RabinKit.Core.Services
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@TaskC.Name</MudText>
+    </TitleContent>
+    <DialogContent>
+        @((MarkupString)text.Replace("\n", "<br>"))
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] 
+    public TaskComponent TaskC { get; set; }
+
+    private string text;
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+
+        text = TaskC.Description;
+    }
+   
+}
