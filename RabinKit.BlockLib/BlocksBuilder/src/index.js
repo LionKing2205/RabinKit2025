@@ -237,7 +237,45 @@ export const init = (toolbox, playgroundSource, parameters) => {
             "tooltip": "",
             "helpUrl": ""
         },
+        {
+            "type": "getrandbits_4_3",
+            "message0": "случайное число с длиной бит %1",
+            "args0": [
+                {
+                    "type": "input_value",
+                    "name": "bit_length"
+                }
+            ],
+            "inputsInline": true,
+            "output": "Number",
+            "colour": 230,
+            "tooltip": "Генерирует случайное число с указанной длиной бит и добавляет 0b11.",
+            "helpUrl": ""
+        }
     ]);
+
+//pythonGenerator.forBlock['getrandbits_4_3'] = function (block) {
+//    var bit_length = pythonGenerator.valueToCode(block, 'bit_length', pythonGenerator.ORDER_ATOMIC);
+//    var code = 
+//        `def generate_random_number(${bit_length}):
+//            while True:
+//                rand_num = random.getrandbits(${bit_length})
+//                result = rand_num | 0b11  # Устанавливаем два младших бита в 11
+
+//                # Проверяем, если количество бит меньше заданного, устанавливаем старший бит
+//                if result.${bit_length}() < ${bit_length}:
+//                    result = (1 << (${bit_length} - 1)) | result
+
+//                return result`
+//    ;
+//    return [code, pythonGenerator.ORDER_NONE];
+//};
+    pythonGenerator.forBlock['getrandbits_4_3'] = function (block) {
+        var value_bit_length = pythonGenerator.valueToCode(block, 'bit_length', pythonGenerator.ORDER_ATOMIC);
+        //var code = 'random.getrandbits(' + value_bit_length + ') | 0b11';
+        var code = 'generate_random_number(' + value_bit_length + ')';
+        return [code, pythonGenerator.ORDER_NONE];
+    };
 
     pythonGenerator.forBlock['crc32'] = function (block, generator) {
         var value_message = pythonGenerator.valueToCode(block, 'val', pythonGenerator.ORDER_ATOMIC);

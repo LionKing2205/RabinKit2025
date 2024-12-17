@@ -91,16 +91,16 @@ namespace RabinKit.Core.Components
                 ["bit_length"],["p", "q"],
                 "FirstPrime",
                 [
-                    //new TestValuesSet(
-                    //InputVars: new
-                    //{
-                    //    bit_length = 4,
-                    //},
-                    //OutputVars: new
-                    //{
-                    //    p = 13,
-                    //    q = 14,
-                    //}),
+                    new TestValuesSet(
+                    InputVars: new
+                    {
+                        bit_length = 20,
+                    },
+                    OutputVars: new
+                    {
+                        p = "keytest",
+                        q = "keytest",
+                    }),
                 ],
                 false),
                 (1,numberCounter,
@@ -124,19 +124,19 @@ namespace RabinKit.Core.Components
                 false),
                 (1,numberCounter,
                 "Зашифровать произвольное сообщение по алгоритму Рабина",
-                ["m", "l"],["p","q","crc", "c"],
+                ["bit_length", "m"],["p","q","crc", "c"],
                 "FirstFull",
                 [
                     new TestValuesSet(
                     InputVars: new
                     {
-                        m = 0,
-                        l = 0
+                        bit_length = 0,
+                        m = 0
                     },
                     OutputVars: new
                     {
-                        p = 0,
-                        q = 0,
+                        p = "keytest",
+                        q = "keytest",
                         c = 0,
                         crc = 0
                     }),

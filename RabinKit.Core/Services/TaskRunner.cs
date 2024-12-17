@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using IronPython.Hosting;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using IronPython.Runtime.Operations;
 
 namespace RabinKit.Core.Services
 {
@@ -64,27 +65,87 @@ namespace RabinKit.Core.Services
                 var i = 0;
                 var result = RunCode(taskAttempt, test.InputVars).Select(x => x.Value).ToList();
                 var prepareoutputs = test.OutputVars.Select(x => x.Value).ToList();
-                foreach (var value in result) {
-                    if (result[i].ToString() != prepareoutputs[i].ToString())
+                foreach (var value in result)
+                {
+                    if (prepareoutputs[i] != "keytest")
                     {
-                        lastResult = false;
-                        shouldBreak = true;
-                        break;
+                        if (result[i].ToString() != prepareoutputs[i].ToString())
+                        {
+                            lastResult = false;
+                            shouldBreak = true;
+                            break;
+                        }
                     }
-                    i ++;
+                    else
+                    {
+                        var bitLengths = test.InputVars
+                            .Where(x => x.Key == "bit_length") 
+                            .Select(x => x.Value) 
+                            .FirstOrDefault();
+                        var res = result[i];
+                        bool testresult =  KeyTest((int)result[i], Convert.ToInt32(bitLengths));
+                        if (testresult == false)
+                        {
+                            lastResult = false;
+                            shouldBreak = true;
+                            break;
+                        }
+                    }
+                    i++;
                 }
                 if (shouldBreak){break;}
             }
             if (lastResult)
             {
-                taskAttempt.IsPassed = true;
                 TaskStatusR statusRes = await _dbContext.TaskStatus.FirstOrDefaultAsync(x => x.TaskId == taskAttempt.TaskId);
                 if (statusRes != null)
                 {
                     statusRes.IsPassed = true;
                 }
+                taskAttempt.IsPassed = true;
             }
             else taskAttempt.IsPassed = false;
+        }
+
+        private static bool KeyTest(int p, int bitLength)
+        {
+            if (!IsPrime(p))
+            {
+                return false;
+            }
+            // Проверяем, что длина p соответствует половине указанной битовой длины
+            int requiredLength = bitLength / 2;
+            if (GetBitLength(p) != requiredLength)
+            {
+                return false;
+            }
+            // Проверяем условие p = k * 4 + 3
+            if (p % 4 != 3)
+            {
+                return false;
+            }
+            return true;
+        }
+        static int GetBitLength(int number)
+        {
+            return (int)Math.Floor(Math.Log2(number)) + 1;
+        }
+
+        private static bool IsPrime(int number)
+        {
+            if (number <= 1) return false;
+            if (number <= 3) return true; 
+
+            if (number % 2 == 0 || number % 3 == 0) return false; 
+
+            for (int i = 5; i * i <= number; i += 6)
+            {
+                if (number % i == 0 || number % (i + 2) == 0)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private IEnumerable<(string Name, dynamic Value)> RunCode(
@@ -99,12 +160,49 @@ namespace RabinKit.Core.Services
                 var value = _engine.Execute($"int(\"{taskAttemptParameter.Value}\")");
                 scope.SetVariable(taskAttemptParameter.Key, value);
             }
-            var codelibs = $"import zlib\n";
-            code = codelibs + code;
+            
+            code = EditCodeDefs(code);
             _engine.Execute(code, scope);
 
             var outputVars = taskAttempt.TaskComponents.Output.Select(x => (x, scope.GetVariable(x)));
             return outputVars;
+        }
+
+        private static string EditCodeDefs(string code)
+        {
+            var codelibs = $"import zlib\nimport random\n";
+            var generate_random_number = $"\n\n" + """
+                            def generate_random_number(bit_length):
+                                while True:
+                                    rand_num = random.getrandbits(bit_length)
+                                    result = rand_num | 0b11 
+                                    if result.bit_length() < bit_length:
+                                        result = (1 << (bit_length - 1)) | result
+                                    return result
+                            """ + $"\n\n";
+            int index = code.IndexOf("def");
+            if (index != -1)
+            {
+                int index1 = code.IndexOf("generate_random_number");
+                if (index1 != -1)
+                {
+                    code = code.Insert(index, generate_random_number);
+                }
+            }
+            else
+            {
+                int noneIndex = code.IndexOf("None");
+                if (noneIndex != -1)
+                {
+                    int index1 = code.IndexOf("generate_random_number");
+                    if (index1 != -1)
+                    {
+                        code = code.Insert(index, generate_random_number);
+                    }
+                }
+            }
+            code = codelibs + code;
+            return code;
         }
 
         public static string PrepareScriptForDisplay(string code)

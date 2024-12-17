@@ -29,8 +29,6 @@
         }
     }
 
-
-
     public async Task<string> GenerateAsync()
     {
         string code = await _module.generate<string>(_workspace);

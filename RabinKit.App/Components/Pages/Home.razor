@@ -11,9 +11,10 @@
         Криптографическая система Рабина
     </MudText>
     @if (student != null){
-        <MudText Align="Align.Right" Typo="Typo.h5" Style="width: 100%;">
+        <MudText Align="Align.Right" Typo="Typo.h5" Style="display: inline-block;">
             @($"{student.Name} {student.Group} {student.Year}")
         </MudText>
+
     }
 </SectionContent>
 <br>
@@ -170,7 +171,7 @@ else
             .Where(e => e.TaskId >= startId && e.TaskId <= endId && e.IsPassed)
             .CountAsync();
         var totalCount = await DbContext.TaskComponents
-            .Where(e => e.Id >= startId && e.Id <= endId)
+            .Where(e => e.Id >= startId && e.Id <= endId && e.IsTest == false)
             .CountAsync();
         var testId = await DbContext.TaskComponents
             .Where(e => e.IsTest == true && e.Id >= startId && e.Id <= endId)

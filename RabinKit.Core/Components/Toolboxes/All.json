@@ -263,6 +263,10 @@
         },
         {
           "kind": "block",
+          "type": "getrandbits_4_3"
+        },
+        {
+          "kind": "block",
           "type": "math_atan2"
         },
         {
