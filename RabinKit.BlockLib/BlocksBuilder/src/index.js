@@ -47,7 +47,7 @@ export const init = (toolbox, playgroundSource, parameters) => {
             ],
             "inputsInline": true,
             "output": "Number",
-            "colour": 230,
+            "colour": 200,
             "tooltip": "CRC32",
             "helpUrl": ""
         },
@@ -73,7 +73,7 @@ export const init = (toolbox, playgroundSource, parameters) => {
             ],
             "inputsInline": true,
             "output": "Number",
-            "colour": 230,
+            "colour": 200,
             "tooltip": "Нахождение степени по модулю",
             "helpUrl": ""
         },
@@ -94,7 +94,7 @@ export const init = (toolbox, playgroundSource, parameters) => {
             ],
             "inputsInline": true,
             "output": "Number",
-            "colour": 230,
+            "colour": 200,
             "tooltip": "Нахождение наибольшего общего делителя",
             "helpUrl": ""
         },
@@ -110,7 +110,7 @@ export const init = (toolbox, playgroundSource, parameters) => {
             ],
             "inputsInline": true,
             "output": "Number",
-            "colour": 230,
+            "colour": 200,
             "tooltip": "Нахождение наибольшего общего делителя",
             "helpUrl": ""
         },
@@ -243,36 +243,94 @@ export const init = (toolbox, playgroundSource, parameters) => {
             "args0": [
                 {
                     "type": "input_value",
-                    "name": "bit_length"
+                    "name": "bit_length",
+                    "check": "Number"
                 }
             ],
             "inputsInline": true,
             "output": "Number",
-            "colour": 230,
+            "colour": 200,
             "tooltip": "Генерирует случайное число с указанной длиной бит и добавляет 0b11.",
+            "helpUrl": ""
+        },
+        {
+            "type": "decryption_defs",
+            "message0": "p = %1,  q = %2, c = %3, m_id = %4",
+            "args0": [
+                {
+                    "type": "input_value",
+                    "name": "p_key",
+                    "check": "Number"
+                },
+                {
+                    "type": "input_value",
+                    "name": "q_key",
+                    "check": "Number"
+                },
+                {
+                    "type": "input_value",
+                    "name": "enc_mess",
+                    "check": "Number"
+                },
+                {
+                    "type": "input_value",
+                    "name": "mess_id",
+                    "check": "Number"
+                }
+            ],
+            "inputsInline": true,
+            "output": "Number",
+            "colour": 200,
+            "tooltip": "Расшифровать сообщение получить указанный вариант расшифровки (от 1 до 4)",
+            "helpUrl": ""
+        },
+        {
+            "type": "decryption_defs_list",
+            "message0": "p = %1,  q = %2, c = %3",
+            "args0": [
+                {
+                    "type": "input_value",
+                    "name": "p_key",
+                    "check": "Number"
+                },
+                {
+                    "type": "input_value",
+                    "name": "q_key",
+                    "check": "Number"
+                },
+                {
+                    "type": "input_value",
+                    "name": "enc_mess",
+                    "check": "Number"
+                }
+            ],
+            "inputsInline": true,
+            "output": "Array",
+            "colour": 190,
+            "tooltip": "Расшифровать сообщение получить списком все варианты расшифровки",
             "helpUrl": ""
         }
     ]);
 
-//pythonGenerator.forBlock['getrandbits_4_3'] = function (block) {
-//    var bit_length = pythonGenerator.valueToCode(block, 'bit_length', pythonGenerator.ORDER_ATOMIC);
-//    var code = 
-//        `def generate_random_number(${bit_length}):
-//            while True:
-//                rand_num = random.getrandbits(${bit_length})
-//                result = rand_num | 0b11  # Устанавливаем два младших бита в 11
+    pythonGenerator.forBlock['decryption_defs'] = function (block, generator) {
+        var _p_key = generator.valueToCode(block, 'p_key', Order.ATOMIC);
+        var _q_key = generator.valueToCode(block, 'q_key', Order.ATOMIC);
+        var _c = generator.valueToCode(block, 'enc_mess', Order.ATOMIC);
+        var _mess_id = generator.valueToCode(block, 'mess_id', Order.ATOMIC);
+        var code = 'decryption_mod(' + _p_key + ', ' + _q_key + ', ' + _c + ', ' + _mess_id + ')';
+        return [code, Order.FUNCTION_CALL];
+    };
 
-//                # Проверяем, если количество бит меньше заданного, устанавливаем старший бит
-//                if result.${bit_length}() < ${bit_length}:
-//                    result = (1 << (${bit_length} - 1)) | result
+    pythonGenerator.forBlock['decryption_defs_list'] = function (block, generator) {
+        var _p_key = generator.valueToCode(block, 'p_key', Order.ATOMIC);
+        var _q_key = generator.valueToCode(block, 'q_key', Order.ATOMIC);
+        var _c = generator.valueToCode(block, 'enc_mess', Order.ATOMIC);
+        var code = 'decryption_mod_list(' + _p_key + ', ' + _q_key + ', ' + _c + ')';
+        return [code, Order.FUNCTION_CALL];
+    };
 
-//                return result`
-//    ;
-//    return [code, pythonGenerator.ORDER_NONE];
-//};
     pythonGenerator.forBlock['getrandbits_4_3'] = function (block) {
         var value_bit_length = pythonGenerator.valueToCode(block, 'bit_length', pythonGenerator.ORDER_ATOMIC);
-        //var code = 'random.getrandbits(' + value_bit_length + ') | 0b11';
         var code = 'generate_random_number(' + value_bit_length + ')';
         return [code, pythonGenerator.ORDER_NONE];
     };
@@ -280,7 +338,6 @@ export const init = (toolbox, playgroundSource, parameters) => {
     pythonGenerator.forBlock['crc32'] = function (block, generator) {
         var value_message = pythonGenerator.valueToCode(block, 'val', pythonGenerator.ORDER_ATOMIC);
         var code = 'zlib.crc32(str(' + value_message + ').encode("utf-8")) & 0xffffffff';
-       /* var code = 'calculate_crc32(' + value_message + ')'; */
         return [code, pythonGenerator.ORDER_NONE];
     };
 

@@ -272,6 +272,10 @@ export const toolbox1 =  {
                 {
                     "kind": "block",
                     "type": "crc32"
+                },
+                {
+                    "kind": "block",
+                    "type": "decryption_defs"
                 }
             ]
         },
@@ -280,6 +284,10 @@ export const toolbox1 =  {
             "name": "Списки",
             "categorystyle": "list_category",
             "contents": [
+                {
+                    "kind": "block",
+                    "type": "decryption_defs_list"
+                },
                 {
                     "kind": "block",
                     "type": "lists_create_empty"

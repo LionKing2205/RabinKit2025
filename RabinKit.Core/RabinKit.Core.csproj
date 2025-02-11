@@ -21,7 +21,14 @@
     <None Remove="Components\Toolboxes\All.json" />
     <None Remove="Components\Toolboxes\FirstFull.json" />
     <None Remove="Components\Toolboxes\FirstPrime.json" />
+    <None Remove="Components\Toolboxes\Full.json" />
+    <None Remove="Components\Toolboxes\SecondEuclide.json" />
     <None Remove="Py_modules\crc32.py" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Components\Toolboxes\Full.json" />
+    <EmbeddedResource Include="Components\Toolboxes\SecondEuclide.json" />
   </ItemGroup>
 
   <ItemGroup>

@@ -41,6 +41,34 @@ public class DbSeeder : IDbSeeder
                 task.istest
             );
         }
+        foreach (var task in SecondModuleParameters.Tasks)
+        {
+            await InsertTaskAsync(
+                task.module,
+                task.number,
+                task.name,
+                task.inputVars,
+                task.outputVars,
+                task.toolboxFileName,
+                counter,
+                task.testParams,
+                task.istest
+            );
+        }
+        foreach (var task in FourthModuleParameters.Tasks)
+        {
+            await InsertTaskAsync(
+                task.module,
+                task.number,
+                task.name,
+                task.inputVars,
+                task.outputVars,
+                task.toolboxFileName,
+                counter,
+                task.testParams,
+                task.istest
+            );
+        }
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -57,15 +85,25 @@ public class DbSeeder : IDbSeeder
         bool istest = false)//,
       //  List<PerformanceTest>? performanceTests = null)
     {
+        string description;
         var id = Convert.ToInt64(module * 10 + number);
+        try
+        {
+            description = await new StreamReader(
+                GetStream($"RabinKit.Core.Components.Descriptions.{id}.md"))
+            .ReadToEndAsync();
+        }
+        catch (Exception)
+        {
+            description = "None";
+        }
+        
         var task = new TaskComponent
         {
             Id = id,
            // Number = numbers,
             Name = name,
-            Description = await new StreamReader(
-                    GetStream($"RabinKit.Core.Components.Descriptions.{id}.md"))
-                .ReadToEndAsync(),
+            Description = description,
             Input = inputVars,
             Output = outputVars,
             Toolbox = await LoadToolboxAsync(toolboxFileName)!,

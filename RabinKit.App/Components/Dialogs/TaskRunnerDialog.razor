@@ -39,16 +39,20 @@
                         <MudTextField T="string" Label="Cтатус" Variant="Variant.Outlined" Text="Задача не решена" AutoGrow />
                     }
                 }
-                   
+
+            }
+            @if (exep is not null)
+            {
+                <MudTextField T="string" Label="Ошибка" Variant="Variant.Outlined" Text=@exep AutoGrow/>
             }
         </MudStack>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Primary"
-                   OnClick="() => ExceptionHandler.HandleAsync(RunAsync)"
-                   Variant="Variant.Filled">Запустить
+        OnClick="() => ExceptionHandler.HandleAsync(RunAsync)"
+        Variant="Variant.Filled">Запустить
         </MudButton>
-       @*  <MudButton Color="Color.Primary" OnClick="@Cancel" Variant="Variant.Filled">Close</MudButton> *@
+        @*  <MudButton Color="Color.Primary" OnClick="@Cancel" Variant="Variant.Filled">Close</MudButton> *@
     </DialogActions>
 </MudDialog>
 
@@ -67,6 +71,7 @@
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     private TaskAttempt attempt;
+    private string exep;
 
     /// <inheritdoc />
     protected override void OnInitialized()
@@ -97,9 +102,16 @@
             Values,
             TaskC);
 
-        await TaskRunner.RunAsync(attempt);
-        
-        _isLoading = false;
+        try
+        {
+            await TaskRunner.RunAsync(attempt);
+        }
+        catch (Exception ex)
+        {
+            exep = ex.Message;
+        }
+
+            _isLoading = false;
         //MudDialog.Close(attempt);
     }
     ///todo

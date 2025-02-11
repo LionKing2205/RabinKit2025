@@ -160,14 +160,120 @@ namespace RabinKit.Core.Services
                 var value = _engine.Execute($"int(\"{taskAttemptParameter.Value}\")");
                 scope.SetVariable(taskAttemptParameter.Key, value);
             }
-            
-            code = EditCodeDefs(code);
-            _engine.Execute(code, scope);
 
+            var moduleid = taskAttempt.TaskId / 10;
+            code = EditCodeDefs(code);
+
+            if ((moduleid == 3) || (moduleid == 4)){
+                code = EditCodeDefsDecrypt(code);
+            }
+            _engine.Execute(code, scope);
+            ///for module 4 add return code
             var outputVars = taskAttempt.TaskComponents.Output.Select(x => (x, scope.GetVariable(x)));
             return outputVars;
-        }
 
+            //todo: доработать преобразование списка в выводимое значение
+        }
+        private static string EditCodeDefsDecrypt(string code)
+        {
+            var decryption_def = $"\n\n" + """
+                        import array
+                        import math
+
+                        def funcz(c, x):
+                          y = round((x + 1) / 4)
+                          return pow(c, y, x)
+
+                        def extended_gcd(a, b):
+                            if b == 0:
+                                return a, 1, 0
+                            gcd, x1, y1 = extended_gcd(b, a % b)
+                            x = y1
+                            q = a // b
+                            y = x1 - q * y1
+                            return gcd, x, y
+                        
+
+                        def decryption_mod(p, q, c, correct_id):
+                            correct_id = correct_id - 1
+                            n = p * q
+                            roots_p = funcz(c, p)
+                            roots_q = funcz(c, q)
+                            y = extended_gcd(p, q)
+                            yp = y[1]
+                            yq = y[2]
+
+                            a = roots_q * yp * p
+                            b = roots_p * yq * q
+
+                            possible_answers = [
+                            pow(round(math.fabs(a + b)), 1, n),
+                            n - pow(round(math.fabs(a + b)), 1, n),
+                            pow(round(math.fabs(a - b)), 1, n),
+                            n - pow(round(math.fabs(a - b)), 1, n)
+                            ]
+                            if correct_id < len(possible_answers):
+                                return possible_answers[correct_id]
+                            else:
+                                return 0
+
+                        def decryption_mod_list(p, q, c):
+                            
+                            n = p * q
+                            roots_p = funcz(c, p)
+                            roots_q = funcz(c, q)
+                            y = extended_gcd(p, q)
+                            yp = y[1]
+                            yq = y[2]
+                        
+                            a = roots_q * yp * p
+                            b = roots_p * yq * q
+                        
+                            possible_answers = [
+                            pow(round(math.fabs(a + b)), 1, n),
+                            n - pow(round(math.fabs(a + b)), 1, n),
+                            pow(round(math.fabs(a - b)), 1, n),
+                            n - pow(round(math.fabs(a - b)), 1, n)
+                            ]
+                            return possible_answers
+                        """ + $"\n\n";
+                            //return array.array('i', possible_answers)
+            int index = code.IndexOf("def");
+            if (index != -1)
+            {
+                    code = code.Insert(index, decryption_def);
+            }
+            else
+            {
+                int noneIndex = code.IndexOf("None");
+                if (noneIndex != -1)
+                {
+                        code = code.Insert(index, decryption_def);
+                }
+                else
+                {
+                    int lastImportIndex = code.LastIndexOf("import");
+                    if (lastImportIndex != -1)
+                    {
+                        int endOfLineIndex = code.IndexOf("\n", lastImportIndex);
+                        if (endOfLineIndex == -1)
+                        {
+                            code += "\n" + decryption_def + "\n";
+                        }
+                        else
+                        {
+                            code = code.Insert(endOfLineIndex + 1, decryption_def + "\n");
+                        }
+                    }
+                    else
+                    {
+                        code = decryption_def + "\n" + code;
+                    }
+                }
+            }
+            
+            return code;
+        }
         private static string EditCodeDefs(string code)
         {
             var codelibs = $"import zlib\nimport random\n";
@@ -215,22 +321,23 @@ namespace RabinKit.Core.Services
 
         private static string EditCode(TaskAttempt taskAttempt)
         {
-            var editedcode = PrepareScriptForDisplay(
-                taskAttempt.TaskComponents.Input
-                    .Aggregate(
-                        taskAttempt.Code,
-                        (acc, cur) =>
-                            acc.Replace($"{cur} = None\n", "")));
-            editedcode = PrepareScriptForDisplay(
-                 taskAttempt.TaskComponents.Output
-                  .Aggregate(
-                    editedcode,
-                   (acc, cur) =>
-                       acc.Replace($"{cur} = None\n", "")));
-         //   editedcode = Regex.Replace(editedcode, @"^s*n", "", RegexOptions.Multiline);
-            editedcode = Regex.Replace(editedcode, @"(ns*n)+", "n");
-            editedcode = editedcode.Trim();
-            return editedcode;
+            var editedCode = Regex.Replace(taskAttempt.Code, @"(s*.*\bNone\b.*s*\n?)(s*\n)+", "", RegexOptions.Multiline);
+            //var editedCode = PrepareScriptForDisplay(
+            //    taskAttempt.TaskComponents.Input
+            //        .Aggregate(
+            //            taskAttempt.Code,
+            //            (acc, cur) =>
+            //                acc.Replace($"{cur} = None\n", "")));
+            //editedCode = PrepareScriptForDisplay(
+            //     taskAttempt.TaskComponents.Output
+            //      .Aggregate(
+            //        editedcode,
+            //       (acc, cur) =>
+            //           acc.Replace($"{cur} = None\n", "")));
+            //   editedCode = Regex.Replace(editedcode, @"^s*n", "", RegexOptions.Multiline);
+            editedCode = Regex.Replace(editedCode, @"(ns*n)+", "n");
+            editedCode = editedCode.Trim();
+            return editedCode;
         }
     }
 }

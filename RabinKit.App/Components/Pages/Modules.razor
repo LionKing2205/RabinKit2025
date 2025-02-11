@@ -14,7 +14,10 @@
             <h3 class="text-center" Style="width: 100%;">Расшифровка сообщения законным пользователем</h3>
             break;
         case 3:
-            <h3 class="text-center" Style="width: 100%;">Атака на криптографическую систему</h3>
+            <h3 class="text-center" Style="width: 100%;">Снятие неоднозначности при декодировании</h3>
+            break;
+        case 4:
+            <h3 class="text-center" Style="width: 100%;">Расшифровка сообщения незаконным пользователем</h3>
             break;
         default:
             <h3 class="text-center" Style="width: 100%;">Неверный модуль</h3>
@@ -33,8 +36,8 @@
         </HeaderContent>
         <RowTemplate>
             <MudTd>
-                <MudButton Class="no-wrap" Variant="Variant.Filled" Color="Color.Primary" Href="@($"/module/{moduleId}/{moduleId * 10 + @context.TaskNumber}")">
-                    @($"Задача {moduleId}.{@context.TaskNumber}")
+                <MudButton Class="no-wrap" Variant="Variant.Filled" Color="Color.Primary" Href="@($"/module/{moduleId}/{@context.TaskNumber}")">
+                    @($"Задача {@context.TaskNumber / 10}.{@context.TaskNumber % 10}")
                 </MudButton>
             </MudTd>
             <MudTd>@context.Name</MudTd>
@@ -58,25 +61,40 @@
     {
         a = moduleId * 10 - 1;
         b = moduleId * 10 + 10;
+        var c = Convert.ToInt16(moduleId) * 10;
         taskCount = DbContext.TaskComponents
                             .Count(e => e.Id > a && e.Id < b);
 
         _status = await DbContext.TaskStatus.ToListAsync();
         _task = await DbContext.TaskComponents.ToListAsync();
 
-        for (int i = 1; i <= taskCount; i++)
+        for (int i = c + 1; i <= taskCount + c; i++)
         {
-            if (!_task[i - 1].IsTest)
+            var taskItem = _task.FirstOrDefault(t => t.Id == i);
+            var taskStatus = _status.FirstOrDefault(t => t.TaskId == i);
+            if (!taskItem.IsTest)
             {
-                tasks.Add(new TaskItem
-                    {
-                        TaskNumber = i,
-                        Name = _task[i - 1].Name,
-                        IsPassed = PassedText(_status[i - 1].IsPassed), // Пример статуса
-                        SolutionTime = _status[i - 1].SolutionTime.ToString(@"hh\:mm\:ss") // Пример времени решения
-                    });
+                var existingTask = tasks.FirstOrDefault(t => t.TaskNumber == i);
+
+                if (existingTask != null)
+                {
+                    existingTask.Name = taskItem.Name;
+                    existingTask.IsPassed = PassedText(taskStatus.IsPassed);
+                    existingTask.SolutionTime = taskStatus.SolutionTime.ToString(@"hh:mm:ss");
+                }
+                else
+                {
+                    tasks.Add(new TaskItem
+                        {
+                            TaskNumber = i,
+                            Name = taskItem.Name,
+                            IsPassed = PassedText(taskStatus.IsPassed),
+                            SolutionTime = taskStatus.SolutionTime.ToString(@"hh\:mm\:ss")
+                        });
+                }
             }
         }
+
     }
 
     private string PassedText(bool isPassed)

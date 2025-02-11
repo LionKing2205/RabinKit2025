@@ -119,7 +119,8 @@ else
             {
                 GetModuleInfo(10, 19),
                 GetModuleInfo(20, 29),
-                GetModuleInfo(30, 39)
+                GetModuleInfo(30, 39),
+                GetModuleInfo(40, 49),
             };
         modules = new List<ModuleInfo>(await Task.WhenAll(moduleTasks));
 
@@ -201,7 +202,8 @@ else
             Module = (startId / 10),
             Description = startId == 10 ? "Шифрование сообщения законным пользователем" : 
                          startId == 20 ? "Расшифровка сообщения законным пользователем" : 
-                         "Атака на криптографическую систему Рабина",
+                         startId == 30 ? "Снятие неоднозначности при декодировании" :
+                             "Расшифровка сообщения незаконным пользователем",
             Solved = solvedCount,
             Total = totalCount,
             TestId = testId,
