@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/RabinKit.App/Services/encryptionKeys.txt
+/RabinKit.App/Services/encryptionKeys.cs
+/RabinKit.App/Services/Keys.cs
