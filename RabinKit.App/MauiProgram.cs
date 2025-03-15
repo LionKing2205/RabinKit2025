@@ -5,6 +5,7 @@ using RabinKit.Database;
 using RabinKit.Core;
 using MudBlazor.Services;
 using MudBlazor;
+using System.Text;
 
 namespace RabinKit.App
 {
@@ -17,8 +18,8 @@ namespace RabinKit.App
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             });
-            
 
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var isDevelopment = GetDebugEnvironment();
 
             var libval = Path.Combine(
@@ -27,9 +28,7 @@ namespace RabinKit.App
 
             builder.Services.AddCore();
             builder.Services.AddLogging();
-            builder.Services.AddSqLite(x => x.Path = Path.Combine(
-                FileSystem.AppDataDirectory,
-                "Database.db3"),
+            builder.Services.AddSqLite(x => x.Path = libval,
                 isDevelopment: isDevelopment);
 
             Migrate(builder.Services);
@@ -37,10 +36,9 @@ namespace RabinKit.App
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddMudServices();
             builder.Services.AddMudMarkdownServices();
-            builder.UseMauiCommunityToolkit();
             builder.Services.AddScoped<ExceptionHandler>();
             builder.Services.AddScoped<BackupService>();
-
+            builder.UseMauiCommunityToolkit();
 
             if (isDevelopment)
             {

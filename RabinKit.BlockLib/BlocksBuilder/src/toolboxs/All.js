@@ -275,6 +275,18 @@ export const toolbox1 =  {
                 },
                 {
                     "kind": "block",
+                    "type": "to_int"
+                },
+                {
+                    "kind": "block",
+                    "type": "minimum"
+                },
+                {
+                    "kind": "block",
+                    "type": "abs"
+                },
+                {
+                    "kind": "block",
                     "type": "decryption_defs"
                 }
             ]

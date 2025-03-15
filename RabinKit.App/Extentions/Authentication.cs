@@ -1,5 +1,5 @@
-﻿using System;
-using OtpNet;
+﻿using OtpNet;
+using RabinKit.App.Services;
 
 namespace RabinKit.App.GAuthenticator
 {
@@ -7,7 +7,7 @@ namespace RabinKit.App.GAuthenticator
     {
         public bool Authentication(string userInput)
         {
-            string secretKey = "JBSWY3DPEHPK3PXP";
+            string secretKey = Keys.secretKey;
             var key = Base32Encoding.ToBytes(secretKey);
             long timeStep = DateTimeOffset.UtcNow.ToUnixTimeSeconds() / 30;
 

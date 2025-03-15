@@ -20,9 +20,9 @@ namespace RabinKit.Core.Abstractions
 
         //public DbSet<TaskTestAttemptRelation> TaskTestAttemptRelations { get; set; }
 
-        //public DbSet<PerformanceTest> PerformanceTests { get; }
+        public DbSet<PerformanceTest> PerformanceTests { get; }
 
-        //public DbSet<PerformanceTestAttempt> PerformanceTestAttempts { get; }
+        public DbSet<PerformanceTestAttempt> PerformanceTestAttempts { get; }
 
         /// <summary>
         /// БД в памяти

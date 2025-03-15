@@ -1,0 +1,36 @@
+﻿@implements IDisposable
+
+@ChildContent(seconds)
+
+@code {
+    bool isDisposed;
+
+    double seconds;
+
+    [Parameter]
+    public RenderFragment<double> ChildContent { get; set; }
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        StartTimer();
+    }
+
+    private async Task? StartTimer()
+    {
+        while (!isDisposed)
+        {
+            await Task.Delay(100);
+            seconds += 0.1;
+
+            StateHasChanged();
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        isDisposed = true;
+    }
+
+}

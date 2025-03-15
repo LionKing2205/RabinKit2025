@@ -133,6 +133,10 @@
       "contents": [
         {
           "kind": "block",
+          "type": "to_int"
+        },
+        {
+          "kind": "block",
           "type": "math_number",
           "fields": {
             "NUM": 123

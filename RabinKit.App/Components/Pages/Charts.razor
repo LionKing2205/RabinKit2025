@@ -1,0 +1,224 @@
+@page "/charts"
+@using RabinKit.Core.Entities
+@using RabinKit.App.Services
+@using RabinKit.App.Components.Dialogs
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Scripting.Utils
+
+@inject IDbContext DbContext
+@inject IDialogService DialogService
+
+<SectionContent SectionId="@Layout.MainLayout.TopbarSection">
+    <MudText Align="Align.Center" Typo="Typo.h3" Style="width: 100%;">
+        Тест производительности 
+    </MudText>
+    @if (_student != null)
+    {
+        <MudText Align="Align.Right" Typo="Typo.h5" Style="display: inline-block;">
+            @($"{_student.Name} {_student.Group} {_student.Year}")
+        </MudText>
+
+    }
+</SectionContent>
+
+<MudButton Variant="Variant.Filled" Href="/module/4" Color="Color.Primary">Назад</MudButton>
+<MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick=" _toggleCollapse">Параметры</MudButton>
+
+<MudPaper Style="overflow:hidden; position:relative; height: 100%">
+        <MudDrawerContainer Class="mud-height-full">
+        <MudDrawer @bind-Open="@_isCollapsed" Elevation="1" Variant="@DrawerVariant.Persistent" Color="Color.Secondary">
+            @foreach (var (performanceTest, index) in _performanceTests.Select((x, i) => (x, i)))
+            {
+                <MudPaper Outlined="true" Class="pa-2 ma-2">
+                    <p>
+                        @switch (performanceTest.TaskComponent.Id)
+                        {
+                            case 41:
+                                @:Брутфорс
+                                break;
+                            case 42:
+                                @:Ро-Полард
+                                break;
+                            case 43:
+                                @:Брент
+                                break;
+                            case 44:
+                                @:Свой метод
+                                break;
+                            case 45:
+                                @:Итог тест
+                                break;
+                            default:
+                                @:Неизвестный метод
+                                break;
+                        }
+                    </p>
+                    <MudSelect T="PerformanceTestAttempt" Placeholder="(не выбрано)" Clearable 
+                    ValueChanged="value => ValueChanged(index, value)">
+                        @foreach (var attempt in performanceTest.Attempts)
+                        {
+                            <MudSelectItem Value="@attempt">@attempt.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudButton Class="mt-2" Variant="Variant.Outlined" OnClick="() => CreateNewAsync(performanceTest)">Создать</MudButton>
+                </MudPaper>
+            }
+        </MudDrawer>
+
+        <div class="d-flex justify-right align-right mud-height-full">
+            <Chart Config="@_config1" @ref="@_chart1"></Chart>
+        </div>
+    </MudDrawerContainer>
+</MudPaper>
+
+
+@code{
+    private LineConfig _config1;
+    private Chart _chart1;
+    private ChartOptions Options = new();
+    private List<PerformanceTest> _performanceTests = default!;
+    private readonly Dictionary<int, PerformanceTestAttempt> _attempts = new();
+    private Student? _student;
+
+    private bool _isCollapsed = false;
+
+    private void _toggleCollapse()
+    {
+        _isCollapsed = !_isCollapsed;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Options.LineStrokeWidth = 2;
+        Options.MaxNumYAxisTicks = 20;
+
+        _config1 = LineConfigCreator();
+
+        _performanceTests = await LoadPerformanceTestsAsync();
+        _student = await DbContext.Students.FirstOrDefaultAsync();
+    }
+
+    private LineConfig LineConfigCreator()
+    {
+        return new LineConfig
+            {
+                Options = new LineOptions
+                {
+                    Responsive = true,
+                    Tooltips = new Tooltips
+                    {
+                        Mode = InteractionMode.Nearest,
+                        Intersect = true,
+                    },
+                    Hover = new Hover
+                    {
+                        Mode = InteractionMode.Nearest,
+                        Intersect = true
+                    },
+                    Scales = new Scales
+                    {
+                        XAxes = new List<CartesianAxis>
+                        {
+                            new CategoryAxis
+                            {
+                                ScaleLabel = CreateScaleLabel("Длина"),
+                                Ticks = new CategoryTicks
+                                {
+                                    FontColor = "rgba(200, 200, 200, 1)", // Цвет меток (можно изменить на любой другой)
+                                    FontSize = 14 // Размер шрифта меток по оси X
+                                }
+                            }
+                        },
+                        YAxes = new List<CartesianAxis>
+                        {
+                            new LinearCartesianAxis
+                            {
+                                ScaleLabel = CreateScaleLabel("Время"),
+                                Ticks = new LinearCartesianTicks
+                                {
+                                    FontColor = "rgba(200, 200, 200, 1)", // Цвет меток (можно изменить на любой другой)
+                                    FontSize = 14 // Размер шрифта меток по оси Y
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+
+    }
+
+    private ScaleLabel CreateScaleLabel(string label)
+    {
+        return new ScaleLabel { LabelString = label };
+    }
+
+    private async Task<List<PerformanceTest>> LoadPerformanceTestsAsync()
+    {
+        return await DbContext.PerformanceTests
+            .Include(x => x.Attempts.OrderByDescending(x => x.CreatedAt))
+            .Include(x => x.TaskComponent)
+                .ThenInclude(x => x.Attempts)
+            .OrderBy(x => x.TaskComponent.Id)
+            .ToListAsync();
+    }
+
+    private void ValueChanged(int index, PerformanceTestAttempt? obj)
+    {
+        if (obj != null)
+            _attempts[index] = obj;
+        else
+            _attempts.Remove(index);
+
+        UpdateChart();
+    }
+
+    private void UpdateChart()
+    {
+        var labels = _attempts
+            .Values
+            .SelectMany(x => x.Runs.Keys)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToList();
+
+        _config1.Data.Labels.Clear();
+        _config1.Data.Labels.AddRange(labels.ConvertAll(x => x.ToString()));
+        _config1.Data.Datasets.Clear();
+
+        foreach (var attempt in _attempts.Values)
+        {
+            _config1.Data.Datasets.Add(new LineDataset<decimal?>(
+                labels.Select(x => 
+                        attempt.Runs.TryGetValue(x, out var value) 
+                        ? (decimal?)value?.TotalMilliseconds 
+                        : default)
+                    .ToList())
+                    {
+                        BorderColor = $"#{attempt.PerformanceTest.TaskComponent.Name.GetHashCode() % 0x1000000:X6}",
+                    Label = attempt.PerformanceTest.TaskComponent.Name,
+                    });
+        }
+
+        _chart1.Update();
+    }
+
+    private async Task CreateNewAsync(PerformanceTest performanceTest)
+    {
+        await DialogService.ShowAsync<ChartsDialog>(
+            performanceTest.TaskComponent.Name,
+            new DialogParameters
+                {
+            {nameof(ChartsDialog.PerformanceTest), performanceTest},
+                },
+        new DialogOptions()
+            {
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true,
+                CloseButton = true,
+                BackdropClick = false,
+                CloseOnEscapeKey = false
+            });
+    }
+    
+}

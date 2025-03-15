@@ -8,20 +8,20 @@
     <MudPaper Class="pa-4 ma-4" Style="width: 500px;">
         <h1>Экспорт</h1>
         <MudButton 
-            Variant="Variant.Filled"
-            Color="Color.Primary"
-            StartIcon="@Icons.Material.Filled.CloudDownload"
-            OnClick="@ExportAsync">Экспортировать</MudButton>
+        Variant="Variant.Filled"
+        Color="Color.Primary"
+        StartIcon="@Icons.Material.Filled.CloudDownload"
+        OnClick="@ExportAsync">Экспортировать</MudButton>
     </MudPaper>
 
     <MudPaper Class="pa-4 ma-4" Style="width: 500px;">
         <h1>Импорт</h1>
-        <MudFileUpload T="IBrowserFile" Accept=".backup" FilesChanged="UploadFile">
+        <MudFileUpload T="IBrowserFile" Accept=".backup" FilesChanged="ImportFile">
             <ActivatorContent>
                 <MudButton HtmlTag="label"
-                           Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.CloudUpload">
+                Variant="Variant.Filled"
+                Color="Color.Primary"
+                StartIcon="@Icons.Material.Filled.CloudUpload">
                     Импортировать
                 </MudButton>
             </ActivatorContent>
@@ -31,18 +31,21 @@
     <MudPaper Class="pa-4 ma-4" Style="width: 500px;">
         <h1>Сброс</h1>
         <MudButton 
-            Variant="Variant.Filled"
-            Color="Color.Primary"
-            StartIcon="@Icons.Material.Filled.DeleteForever"
-            OnClick="@ResetAsync">Сбросить</MudButton>
+        Variant="Variant.Filled"
+        Color="Color.Primary"
+        StartIcon="@Icons.Material.Filled.DeleteForever"
+        OnClick="@ResetAsync">Сбросить</MudButton>
     </MudPaper>
 </MudContainer>
 
 
 @code {
-    private async Task UploadFile(IBrowserFile file)
+
+    private async Task ImportFile(IBrowserFile file)
     {
-        await BackupService.ImportAsync(file.OpenReadStream());
+
+        using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+        await BackupService.ImportAsync(stream);
     }
 
     private async Task ExportAsync(MouseEventArgs obj)

@@ -1,0 +1,23 @@
+@using RabinKit.App.Services
+@using RabinKit.Core.Entities
+@using RabinKit.Core.Services
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@TaskC.Name</MudText>
+    </TitleContent>
+    <DialogContent>
+    <strong>Входные переменные:</strong> 
+    <span style="color: orange;">@string.Join(", ", TaskC.Input)</span>
+    <br><br> <!-- Добавляем абзац -->
+    <strong>Выходные переменные:</strong> 
+    <span style="color: chocolate;">@string.Join(", ", TaskC.Output)</span>
+</DialogContent>
+</MudDialog>
+
+@code {
+
+    [Parameter] 
+    public TaskComponent TaskC { get; set; }
+  
+}

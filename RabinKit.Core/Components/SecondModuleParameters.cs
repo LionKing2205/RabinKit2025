@@ -18,14 +18,14 @@ namespace RabinKit.Core.Components
                     new TestValuesSet(
                     InputVars: new
                     {
-                        p = 6551,
-                        q = 6247,
+                        p = 6247,
+                        q = 6551,
                         c = 20018970,
                     },
                     OutputVars: new
                     {
-                        mp = 750,
-                        mq = 4677,
+                        mp = 4677,
+                        mq = 750,
                     }),
                 ],
                 false),
@@ -37,13 +37,13 @@ namespace RabinKit.Core.Components
                     new TestValuesSet(
                     InputVars: new
                     {
-                        p = 6551,
-                        q = 6247,
+                        p = 6247,
+                        q = 6551,
                     },
                     OutputVars: new
                     {
-                        yp = -1459,
-                        yq = 1530,
+                        yp = 1530,
+                        yq = -1459,
                     }),
                 ],
                 false),
@@ -55,19 +55,19 @@ namespace RabinKit.Core.Components
                     new TestValuesSet(
                     InputVars: new
                     {
-                        mp = 750,
-                        mq = 4677,
-                        yp = -1459,
-                        yq = 1530,
-                        p = 6551,
-                        q = 6247
+                        mp = 11337032,
+                        mq = 20662512,
+                        yp = -323824,
+                        yq = 253879,
+                        p = 21550819,
+                        q = 27488183
                     },
                     OutputVars: new
                     {
-                        m1 = 6510944,
-                        m2 = 34413153,
-                        m3 = 19941994,
-                        m4 = 20982103
+                        m1 = 216815840381495,
+                        m2 = 375577016090382,
+                        m3 = 199419941994,
+                        m4 = 592193436529883
                     }),
                 ],
                 false),
@@ -79,19 +79,40 @@ namespace RabinKit.Core.Components
                     new TestValuesSet(
                     InputVars: new
                     {
-                        c = 20018970,
-                        p = 6551,
-                        q = 6247
+                        c = 399755760729601,
+                        p = 21550819,
+                        q = 27488183
                     },
                     OutputVars: new
                     {
-                        m1 = 6510944,
-                        m2 = 34413153,
-                        m3 = 19941994,
-                        m4 = 20982103
+                        m1 = 216815840381495,
+                        m2 = 375577016090382,
+                        m3 = 199419941994,
+                        m4 = 592193436529883
                     }),
                 ],
                 false),
+                (2,numberCounter,
+                "Найти 4 потенциальных ключа с помощью исходного сообщения и приватных ключей",
+                ["c", "p", "q"], ["m1", "m2", "m3", "m4"],
+                "SecondEuclide",
+                [
+                    new TestValuesSet(
+                    InputVars: new
+                    {
+                        c = 399755760729601,
+                        p = 21550819,
+                        q = 27488183
+                    },
+                    OutputVars: new
+                    {
+                        m1 = 216815840381495,
+                        m2 = 375577016090382,
+                        m3 = 199419941994,
+                        m4 = 592193436529883
+                    }),
+                ],
+                true),
             };
     }
 }

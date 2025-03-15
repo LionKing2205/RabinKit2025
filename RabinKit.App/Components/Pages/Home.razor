@@ -7,12 +7,15 @@
 @inject IDialogService DialogService
 
 <SectionContent SectionId="@Layout.MainLayout.TopbarSection">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/setting" >
+        Импорт/Экспорт
+    </MudButton>
     <MudText Align="Align.Center" Typo="Typo.h3" Style="width: 100%;">
         Криптографическая система Рабина
     </MudText>
-    @if (student != null){
+    @if (_student != null){
         <MudText Align="Align.Right" Typo="Typo.h5" Style="display: inline-block;">
-            @($"{student.Name} {student.Group} {student.Year}")
+            @($"{_student.Name} {_student.Group} {_student.Year}")
         </MudText>
 
     }
@@ -47,7 +50,7 @@ else
                     @if (module.TestId != null && module.TestId != 0)
                     {
                         <MudText Typo="Typo.h4" Align="Align.Center" Style="margin-bottom: 0.5rem;">
-                            Итоговое тестирование по модулю
+                            Итоговое тестирование по модулю @module.Module
                         </MudText>
 
                         <MudTextField @bind-Value="inputCode"
@@ -89,11 +92,6 @@ else
     </MudContainer>
 }
 
-<MudItem Style="position: absolute; top: 86px; right: 16px;">
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/setting">
-        Импорт/Экспорт
-    </MudButton>
-</MudItem>
 
 @code {
     private List<ModuleInfo> modules;
@@ -101,7 +99,7 @@ else
     private bool isCodeValid;
     private bool isButtonDisabled = true;
     private System.Timers.Timer? timer;
-    private Student? student;
+    private Student? _student;
     private bool _validStudentData = false;
 
     private async Task CheckCode()
@@ -124,12 +122,12 @@ else
             };
         modules = new List<ModuleInfo>(await Task.WhenAll(moduleTasks));
 
-        student = await DbContext.Students.FirstOrDefaultAsync();
-        student = student;
-        if (student == null ||
-            string.IsNullOrEmpty(student.Name) ||
-            string.IsNullOrEmpty(student.Group) ||
-            string.IsNullOrEmpty(student.Year))
+        _student = await DbContext.Students.FirstOrDefaultAsync();
+        _student = _student;
+        if (_student == null ||
+            string.IsNullOrEmpty(_student.Name) ||
+            string.IsNullOrEmpty(_student.Group) ||
+            string.IsNullOrEmpty(_student.Year))
         {
             await GetUserData();
         }
@@ -151,11 +149,11 @@ else
         var dialogResult = await dialog.Result;
         if (dialogResult.Canceled)
         {
-            student = await DbContext.Students.FirstOrDefaultAsync();
-            if (student == null ||
-                string.IsNullOrEmpty(student.Name) ||
-                string.IsNullOrEmpty(student.Group) ||
-                string.IsNullOrEmpty(student.Year))
+            _student = await DbContext.Students.FirstOrDefaultAsync();
+            if (_student == null ||
+                string.IsNullOrEmpty(_student.Name) ||
+                string.IsNullOrEmpty(_student.Group) ||
+                string.IsNullOrEmpty(_student.Year))
             {
                 await GetUserData();
             }

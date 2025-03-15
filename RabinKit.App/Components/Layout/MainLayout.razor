@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
 <MudThemeProvider Theme="MyCustomTheme" IsDarkMode="true" />
+<MudPopoverProvider />
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
@@ -23,13 +24,14 @@
             PaletteLight = new PaletteLight()
             {
                 Primary = Colors.Orange.Default,
-                Secondary = Colors.Green.Accent4,
+                Secondary = Colors.Orange.Darken1,
                 AppbarBackground = Colors.Red.Default,
                 
             },
             PaletteDark = new PaletteDark()
             {
                 Primary = Colors.Orange.Default,
+                Secondary = Colors.Gray.Darken3,
             },
 
             LayoutProperties = new LayoutProperties()

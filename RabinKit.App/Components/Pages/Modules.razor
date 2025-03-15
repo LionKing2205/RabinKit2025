@@ -24,6 +24,13 @@
             ;
             break;
     }
+    @if (_student != null)
+    {
+        <MudText Align="Align.Right" Typo="Typo.h5" Style="display: inline-block;">
+            @($"{_student.Name} {_student.Group} {_student.Year}")
+        </MudText>
+
+    }
 </SectionContent>
 <MudButton Variant="Variant.Filled" Href="/" Color="Color.Primary">Назад</MudButton>
 <MudContainer>
@@ -47,6 +54,15 @@
     </MudTable>
 </MudContainer>
 
+<MudContainer Class="d-flex justify-content-center" Style="margin-top: 20px;">
+    @if (moduleId == 4)
+    {
+        <MudButton Class="no-wrap" Variant="Variant.Filled" Color="Color.Primary" Href="@($"/charts")">
+            Тест производительности
+        </MudButton>
+    }
+</MudContainer>
+
 
 @code {
     private List<TaskComponent> _task = default!;
@@ -54,11 +70,13 @@
     private List<TaskItem> tasks = new List<TaskItem>();
     [Parameter] public long moduleId { get; set; }
     private int taskCount;
+    private Student? _student;
 
     private long a;
     private long b;
     protected override async Task OnInitializedAsync()
     {
+        _student = await DbContext.Students.FirstOrDefaultAsync();
         a = moduleId * 10 - 1;
         b = moduleId * 10 + 10;
         var c = Convert.ToInt16(moduleId) * 10;

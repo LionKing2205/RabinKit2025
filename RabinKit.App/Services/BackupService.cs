@@ -2,6 +2,8 @@
 using RabinKit.Database;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.IO;
 
 namespace RabinKit.App.Services;
 
@@ -11,6 +13,8 @@ public class BackupService
     private readonly NavigationManager _manager;
     private readonly IServiceScopeFactory _factory;
     private readonly ExceptionHandler _exceptionHandler;
+    //TODO сделать относительный путь
+   // private readonly string filePath = Path.Combine(Environment.CurrentDirectory, "encryptionKeys.txt");
 
     private readonly string DbFileName = Path.Combine(
         FileSystem.AppDataDirectory,
@@ -22,6 +26,9 @@ public class BackupService
         FileSystem.AppDataDirectory,
         "Database.db3.restore");
 
+    private static readonly byte[] Key = Convert.FromBase64String(Keys.Key);
+    private static readonly byte[] IV = Convert.FromBase64String(Keys.IV);
+    
     public BackupService(
         EfContext context,
         NavigationManager manager,
@@ -36,6 +43,7 @@ public class BackupService
 
     public async Task ExportAsync()
     {
+       // LoadKeysFromFile(filePath);
         await _exceptionHandler.HandleAsync(
             async () =>
             {
@@ -47,14 +55,24 @@ public class BackupService
 
                 await using var stream = File.OpenRead(BackupFileName);
 
-                var result = await FileSaver.SaveAsync("data.backup", stream);
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                var dataToEncrypt = ms.ToArray();
+
+                                // Шифрование данных
+                var encryptedData = Encrypt(dataToEncrypt);
+                var encstream = new MemoryStream(encryptedData);
+                // Сохранение зашифрованного файла
+                var result = await FileSaver.SaveAsync("data.backup", encstream);
             },
             catchAll: true,
             finallyFunc: () => _manager.Refresh(true));
     }
 
+
     public async Task ImportAsync(Stream fileContent)
     {
+      //  LoadKeysFromFile(filePath);
         await _exceptionHandler.HandleAsync(
             async () =>
             {
@@ -64,11 +82,25 @@ public class BackupService
                 await _context.Database.EnsureDeletedAsync();
                 await ReleaseAsync();
 
+                // Чтение зашифрованного файла
+                using var ms = new MemoryStream();
+                await fileContent.CopyToAsync(ms);
+                var encryptedData = ms.ToArray();
+
+                // Расшифрование данных
+                var decryptedData = Decrypt(encryptedData);
+                if (decryptedData == null || decryptedData.Length == 0)
+                {
+                    throw new InvalidOperationException("Расшифрованные данные пусты или недействительны.");
+                }
+
                 await using (var dbFileStream = File.OpenWrite(DbFileName))
-                    await fileContent.CopyToAsync(dbFileStream);
+                {
+                    await dbFileStream.WriteAsync(decryptedData);
+                    await dbFileStream.FlushAsync(); // Обязательно сбросьте буфер
+                }
 
                 await using var scope = _factory.CreateAsyncScope();
-
                 _ = await scope.ServiceProvider.GetRequiredService<EfContext>().Database
                     .GetPendingMigrationsAsync();
                 await scope.ServiceProvider.GetRequiredService<DbMigrator>().MigrateAsync();
@@ -81,6 +113,7 @@ public class BackupService
             finallyFunc: () => _manager.NavigateTo("/", true),
             catchAll: true);
     }
+
 
     public async Task ResetAsync()
     {
@@ -108,5 +141,33 @@ public class BackupService
         await _context.DisposeAsync();
         GC.WaitForPendingFinalizers();
         GC.Collect();
+    }
+
+    private byte[] Encrypt(byte[] data)
+    {
+        using var aes = Aes.Create();
+        aes.Key = Key;
+        aes.IV = IV;
+
+        using var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+        using var ms = new MemoryStream();
+        using var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
+        cs.Write(data, 0, data.Length);
+        cs.FlushFinalBlock();
+        return ms.ToArray();
+    }
+
+    private byte[] Decrypt(byte[] data)
+    {
+        using var aes = Aes.Create();
+        aes.Key = Key;
+        aes.IV = IV;
+
+        using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+        using var ms = new MemoryStream(data);
+        using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
+        using var resultStream = new MemoryStream();
+        cs.CopyTo(resultStream);
+        return resultStream.ToArray();
     }
 }

@@ -19,6 +19,13 @@
 
 <SectionContent SectionId="@Layout.MainLayout.TopbarSection">
     <h3 class="text-center" Style="width: 100%;">@_task.Name</h3>
+    @if (_student != null)
+    {
+        <MudText Align="Align.Right" Typo="Typo.h5" Style="display: inline-block;">
+            @($"{_student.Name} {_student.Group} {_student.Year}")
+        </MudText>
+
+    }
 </SectionContent>
 <MudGrid>
     <MudItem xs="12" class="d-flex align-items-center justify-between">
@@ -27,11 +34,16 @@
             <MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Inherit" OnClick="@SaveAsync">
                 Сохранить
             </MudButton>
-            <MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Primary" OnClick="@RunAsync">
+            <MudButton Variant="Variant.Filled" Class="ml-2" Edge="Edge.Start" Color="Color.Primary" OnClick="@RunAsync">
                 Запустить
             </MudButton>
         </div>
-        <span class="mx-auto">Время решения: @GetFormattedElapsedTime()</span>
+        <span class="mx-auto d-block text-center text-lg font-weight-bold font-size-2rem">
+            Время решения: @GetFormattedElapsedTime()
+        </span>
+        <MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Inherit" OnClick="@ViewParam">
+            Переменные
+        </MudButton>
         <MudButton Class="ml-2" Edge="Edge.Start" Color="Color.Inherit" OnClick="@ViewCode">
             Код
         </MudButton>
@@ -50,6 +62,7 @@
     public JsonObject Toolbox;
     public string[] Input;
     public string[] Output;
+    private Student? _student;
 
     [Parameter] public long TaskId { get; set; }
     [Parameter] public long moduleId { get; set; }
@@ -61,6 +74,7 @@
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
+        _student = await DbContext.Students.FirstOrDefaultAsync();
         _status = await DbContext.TaskStatus.FirstOrDefaultAsync(x => x.TaskId == TaskId);
         _task = await DbContext.TaskComponents
             .Include(x => x.Values)
@@ -87,6 +101,11 @@
             await ViewDescription();
 
         }
+    }
+
+    private async Task ViewParam()
+    {
+        await ShowDialogAsync("param");
     }
 
     private async Task ViewCode()
@@ -167,6 +186,21 @@
                 { nameof(TaskRunnerDialog.TaskC), _task },
                 { nameof(TaskRunnerDialog.Code), await _kitCanvas.GenerateAsync() }
                         },
+                    new DialogOptions
+                        {
+                            MaxWidth = MaxWidth.Small,
+                            FullWidth = true,
+                            CloseButton = true,
+                        });
+                break;
+
+            case "param":
+                await DialogService.ShowAsync<ParamDialog>(
+                    _task.Name,
+                    new DialogParameters
+                            {
+                { nameof(TaskRunnerDialog.TaskC), _task },
+                            },
                     new DialogOptions
                         {
                             MaxWidth = MaxWidth.Small,

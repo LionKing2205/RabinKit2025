@@ -26,6 +26,7 @@
 
         <!-- App Identifier -->
         <ApplicationId>com.companyname.rabinkit.app</ApplicationId>
+		<ApplicationIdGuid>e2f84714-1d69-4bba-906c-3fc6659f61af</ApplicationIdGuid>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -37,7 +38,22 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-    </PropertyGroup>
+
+		<GenerateAppInstallerFile>True</GenerateAppInstallerFile>
+		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+		<AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+		<AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
+		<GenerateTestArtifacts>True</GenerateTestArtifacts>
+		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+		<PackageCertificateThumbprint>8F9704D889F0DEF6E9E8B5430978B08B45099A29</PackageCertificateThumbprint>
+		<DefaultLanguage>ru-ru</DefaultLanguage>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<AssemblyName>RabinKit</AssemblyName>
+	</PropertyGroup>
 
     <ItemGroup>
         <!-- App Icon -->

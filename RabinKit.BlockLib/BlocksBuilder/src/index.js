@@ -53,7 +53,7 @@ export const init = (toolbox, playgroundSource, parameters) => {
         },
         {
             "type": "pow_mod",
-            "message0": "%1 ^ %2 %% %3",
+            "message0": "%1 ^ %2 mod %3",
             "args0": [
                 {
                     "type": "input_value",
@@ -238,6 +238,56 @@ export const init = (toolbox, playgroundSource, parameters) => {
             "helpUrl": ""
         },
         {
+            "type": "to_int",
+            "message0": "целое %1",
+            "args0": [
+                {
+                    "type": "input_value",
+                    "name": "val",
+                    "check": "Number"
+                }
+            ],
+            "output": "Number",
+            "colour": 230,
+            "tooltip": "преобразовать число в целое",
+            "helpUrl": ""
+        },
+        {
+            "type": "abs",
+            "message0": "модуль %1",
+            "args0": [
+                {
+                    "type": "input_value",
+                    "name": "val",
+                    "check": "Number"
+                }
+            ],
+            "output": "Number",
+            "colour": 230,
+            "tooltip": "целочисленный модуль",
+            "helpUrl": ""
+        },
+        {
+            "type": "minimum",
+            "message0": "наименьшее %1 %2",
+            "args0": [
+                {
+                    "type": "input_value",
+                    "name": "val1",
+                    "check": "Number"
+                },
+                {
+                    "type": "input_value",
+                    "name": "val2",
+                    "check": "Number"
+                }
+            ],
+            "output": "Number",
+            "colour": 230,
+            "tooltip": "",
+            "helpUrl": ""
+        },
+        {
             "type": "getrandbits_4_3",
             "message0": "случайное число с длиной бит %1",
             "args0": [
@@ -311,6 +361,24 @@ export const init = (toolbox, playgroundSource, parameters) => {
             "helpUrl": ""
         }
     ]);
+    pythonGenerator.forBlock['to_int'] = function (block, generator) {
+        var _value = generator.valueToCode(block, 'val', Order.ATOMIC);
+        var code = 'int(' + _value + ')';
+        return [code, Order.FUNCTION_CALL];
+    };
+
+    pythonGenerator.forBlock['abs'] = function (block, generator) {
+        var _value = generator.valueToCode(block, 'val', Order.ATOMIC);
+        var code = 'abs(' + _value + ')';
+        return [code, Order.FUNCTION_CALL];
+    };
+
+    pythonGenerator.forBlock['minimum'] = function (block, generator) {
+        var a = generator.valueToCode(block, 'val1', Order.ATOMIC);
+        var b = generator.valueToCode(block, 'val2', Order.ATOMIC);
+        var code = 'min('+a+','+b+')';
+        return [code, Order.FUNCTION_CALL];
+    };
 
     pythonGenerator.forBlock['decryption_defs'] = function (block, generator) {
         var _p_key = generator.valueToCode(block, 'p_key', Order.ATOMIC);
@@ -329,15 +397,17 @@ export const init = (toolbox, playgroundSource, parameters) => {
         return [code, Order.FUNCTION_CALL];
     };
 
-    pythonGenerator.forBlock['getrandbits_4_3'] = function (block) {
+    pythonGenerator.forBlock['getrandbits_4_3'] = function (block, generator) {
+        generator.definitions_['import_random'] = 'import random';
         var value_bit_length = pythonGenerator.valueToCode(block, 'bit_length', pythonGenerator.ORDER_ATOMIC);
-        var code = 'generate_random_number(' + value_bit_length + ')';
+        var code = 'random.getrandbits(int(' + value_bit_length + ') - 2) | (1 << (int(' + value_bit_length +') - 1)) | 0b11';
         return [code, pythonGenerator.ORDER_NONE];
     };
 
     pythonGenerator.forBlock['crc32'] = function (block, generator) {
+        generator.definitions_['import_zlib'] = 'import zlib';
         var value_message = pythonGenerator.valueToCode(block, 'val', pythonGenerator.ORDER_ATOMIC);
-        var code = 'zlib.crc32(str(' + value_message + ').encode("utf-8")) & 0xffffffff';
+        var code = 'zlib.crc32(str(int(' + value_message + ')).encode("utf-8")) & 0xffffffff';
         return [code, pythonGenerator.ORDER_NONE];
     };
 

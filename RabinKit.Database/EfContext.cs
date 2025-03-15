@@ -53,10 +53,10 @@ namespace RabinKit.Database
       //  public DbSet<TaskTestAttemptRelation> TaskTestAttemptRelations { get; set; }
 
         /// <inheritdoc />
-      //  public DbSet<PerformanceTest> PerformanceTests { get; set; }
+        public DbSet<PerformanceTest> PerformanceTests { get; set; }
 
         /// <inheritdoc />
-      //  public DbSet<PerformanceTestAttempt> PerformanceTestAttempts { get; set; }
+        public DbSet<PerformanceTestAttempt> PerformanceTestAttempts { get; set; }
 
         /// <inheritdoc/>
         public bool IsInMemory => Database.IsInMemory();

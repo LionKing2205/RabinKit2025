@@ -31,14 +31,9 @@ namespace RabinKit.Database.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<string>("PrepareScript")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("prepare_script");
-
-                    b.Property<int>("TaskDescriptionId")
+                    b.Property<int>("TaskComponentId")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("task_description_id");
+                        .HasColumnName("task_component_id");
 
                     b.Property<string>("UpdatedAt")
                         .IsRequired()
@@ -49,7 +44,7 @@ namespace RabinKit.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex(new[] { "TaskDescriptionId" }, "ix_performance_tests_task_description_id");
+                    b.HasIndex(new[] { "TaskComponentId" }, "ix_performance_tests_task_component_id");
 
                     b.ToTable("performance_tests", (string)null);
                 });
@@ -188,10 +183,10 @@ namespace RabinKit.Database.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("component")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnName("description");
+                        .HasColumnName("component");
 
                     b.Property<string>("Input")
                         .IsRequired()
@@ -339,13 +334,13 @@ namespace RabinKit.Database.Migrations
 
             modelBuilder.Entity("RabinKit.Database.Models.PerformanceTest", b =>
                 {
-                    b.HasOne("RabinKit.Database.Models.TaskComponent", "TaskDescription")
+                    b.HasOne("RabinKit.Database.Models.TaskComponent", "Taskcomponent")
                         .WithMany("PerformanceTests")
-                        .HasForeignKey("TaskDescriptionId")
+                        .HasForeignKey("TaskcomponentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("TaskDescription");
+                    b.Navigation("Taskcomponent");
                 });
 
             modelBuilder.Entity("RabinKit.Database.Models.PerformanceTestAttempt", b =>

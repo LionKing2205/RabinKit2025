@@ -1,0 +1,163 @@
+@using System.Diagnostics
+@using RabinKit.App.Services
+@using RabinKit.Core.Entities
+@using RabinKit.Core.Services
+
+@inject IDbContext DbContext
+@inject TaskRunner TaskRunner
+@inject ExceptionHandler ExceptionHandler
+
+<MudDialog>
+    <DialogContent>
+        @if (_isRunning || _isCompleted)
+        {
+            <MudTable Items="@results" Striped="true" Hover="true" Bordered="true" Style="max-height: 70vh; overflow-y: auto;">
+                <HeaderContent>
+                    <MudTh>Бит</MudTh>
+                    <MudTh>Время</MudTh>
+                    <MudTh>Тесты</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.Key бит</MudTd>
+                    <MudTd>
+                        @if (context.Value.HasValue)
+                        {
+                            <MudChip T="string" Variant="Variant.Filled" Color="Color.Success">@FormatTimeSpan(context.Value.Value.Item1)</MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" Variant="Variant.Filled" Color="Color.Error">Ошибка</MudChip>
+                        }
+                    </MudTd>
+                    <MudTd>
+                        @if (context.Value.HasValue)
+                        {
+                            <MudChip T="string" Variant="Variant.Filled" Color="Color.Info">@context.Value.Value.Item2 тестов</MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" Variant="Variant.Filled" Color="Color.Error">-</MudChip>
+                        }
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+
+            @if (_currentTest.HasValue)
+            {
+                <div @key="_currentTest" class="d-flex flex-grow-1 gap-4 align-center mt-2">
+                    <MudText>Текущий тест: @_currentTest бит</MudText>
+                    <TimerDiv>
+                        <MudChip T="string" Variant="Variant.Filled" Color="Color.Default">
+                            @FormatTimeSpan(_stopwatch.Elapsed)
+                        </MudChip>
+                    </TimerDiv>
+                    <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true" />
+                </div>
+            }
+            @if (_isCompleted && !results.Any())
+            {
+                <MudText Class="mt-2">Пусто</MudText>
+            }
+            @if (_isCompleted)
+            {
+                <MudText Class="mt-2">Тестирование завершено!</MudText>
+            }
+            @if (!_isCompleted)
+            {
+                <MudButton OnClick="Cancel" Disabled="@_cancellationTokenSource.IsCancellationRequested" Class="mt-2">
+                    @(_cancellationTokenSource.IsCancellationRequested ? "Завершаем..." : "Завершить")
+                </MudButton>
+            }
+        }
+        else
+        {
+            <MudStack>
+                <MudTextField T="int" Label="Начальное значение" Variant="Variant.Outlined" @bind-Value="_startValue"></MudTextField>
+                <MudTextField T="int" Label="Конечное значение" Variant="Variant.Outlined" @bind-Value="_endValue"></MudTextField>
+                <MudTextField T="int" Label="Максимальное к-во тестов" Variant="Variant.Outlined" @bind-Value="_attemptCount"></MudTextField>
+                <MudTextField T="int" Label="Допустимое время ожидания" Variant="Variant.Outlined" @bind-Value="_timeMax"></MudTextField>
+                <MudTextField T="int" Label="Вычислять с шагом" Variant="Variant.Outlined" @bind-Value="_steps"></MudTextField>
+            </MudStack>
+            <MudButton Class="mt-2" Variant="Variant.Outlined" OnClick="@RunAsync">Запустить</MudButton>
+        }
+    </DialogContent>
+</MudDialog>
+
+@code {
+    private bool _isRunning;
+    private bool _isCompleted;
+    private CancellationTokenSource _cancellationTokenSource;
+    private Dictionary<long, (TimeSpan?, int)?> results = new();
+    private long? _currentTest;
+    private Stopwatch _stopwatch = new();
+
+    int _startValue = 16;
+    int _endValue = 56;
+    int _attemptCount = 5;
+    int _timeMax = 3;
+    int _steps = 1;
+
+    [Parameter] public PerformanceTest PerformanceTest { get; set; }
+    [Parameter] public string Code { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    // Метод для форматирования TimeSpan в формат "чч:мм:сс:мс"
+    private string FormatTimeSpan(TimeSpan? timeSpan)
+    {
+        if (!timeSpan.HasValue) return "00:00:00:000";
+        var ts = timeSpan.Value;
+        return $"{ts.Hours:D2}:{ts.Minutes:D2}:{ts.Seconds:D2}:{ts.Milliseconds:D3}";
+    }
+
+    private async Task RunAsync()
+    {
+        MudDialog.SetOptions(MudDialog.Options);
+
+        _stopwatch.Restart();
+        _cancellationTokenSource = new CancellationTokenSource();
+        var inputValues = Enumerable.Range(0, (_endValue - _startValue) / _steps + 1)
+            .Select(i => (long)(_startValue + i * _steps))
+            .Where(x => x <= _endValue)
+            .ToArray();
+        var attempt = new PerformanceTestAttempt()
+            {
+                PerformanceTest = PerformanceTest,
+                Runs = inputValues.ToDictionary(x => x, _ => default(TimeSpan?)),
+            };
+
+        _isRunning = true;
+        _currentTest = inputValues.First();
+
+        await ExceptionHandler.HandleAsync(async () =>
+        {
+            await TaskRunner.RunPerformanceTestAsync(
+                attempt, _attemptCount, _timeMax,
+                (currentInputValue, currentResult, nextValue, runs) =>
+                {
+                    results.Add(
+                        currentInputValue,
+                        currentResult.HasValue ? (currentResult, runs) : null);
+                    _currentTest = nextValue;
+                    StateHasChanged();
+                    _stopwatch.Restart();
+                },
+                _cancellationTokenSource.Token);
+
+            DbContext.PerformanceTestAttempts.Add(attempt);
+            await DbContext.SaveChangesAsync();
+
+            attempt.Name = _steps.ToString() + "steps " + attempt.CreatedAt.ToString();
+            await DbContext.SaveChangesAsync();
+        });
+
+        _isRunning = false;
+        _isCompleted = true;
+        _currentTest = null;
+        StateHasChanged();
+    }
+
+    private async Task Cancel(MouseEventArgs obj)
+    {
+        await _cancellationTokenSource.CancelAsync();
+    }
+}

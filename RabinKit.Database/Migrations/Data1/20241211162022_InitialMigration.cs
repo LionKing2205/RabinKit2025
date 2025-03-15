@@ -71,8 +71,7 @@ namespace RabinKit.Database.Migrations
                 {
                     id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    task_description_id = table.Column<int>(type: "INTEGER", nullable: false),
-                    prepare_script = table.Column<string>(type: "TEXT", nullable: false),
+                    task_component_id = table.Column<int>(type: "INTEGER", nullable: false),
                     created_at = table.Column<string>(type: "TEXT", nullable: false, defaultValueSql: "now()"),
                     updated_at = table.Column<string>(type: "TEXT", nullable: false, defaultValueSql: "now()")
                 },
@@ -81,7 +80,7 @@ namespace RabinKit.Database.Migrations
                     table.PrimaryKey("PK_performance_tests", x => x.id);
                     table.ForeignKey(
                         name: "FK_performance_tests_task_components_task_description_id",
-                        column: x => x.task_description_id,
+                        column: x => x.task_component_id,
                         principalTable: "task_components",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -141,6 +140,7 @@ namespace RabinKit.Database.Migrations
                 {
                     id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    name = table.Column<string>(type: "TEXT", nullable: false),
                     runs = table.Column<string>(type: "TEXT", nullable: false),
                     performance_test_id = table.Column<int>(type: "INTEGER", nullable: false),
                     created_at = table.Column<string>(type: "TEXT", nullable: false, defaultValueSql: "now()"),

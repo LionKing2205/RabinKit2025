@@ -105,7 +105,7 @@ namespace RabinKit.Core.Components
                 false),
                 (1,numberCounter,
                 "Зашифровать произвольное сообщение по алгоритму Рабина, на основе ключей, полученных из п.4",
-                ["p", "q", "m"],["crc", "c"],
+                ["p", "q", "m"],["c"],
                 "FirstFull",
                 [
                     new TestValuesSet(
@@ -117,14 +117,13 @@ namespace RabinKit.Core.Components
                     },
                     OutputVars: new
                     {
-                        crc = 2286445522,
                         c = 2430
                     }),
                 ],
                 false),
                 (1,numberCounter,
                 "Зашифровать произвольное сообщение по алгоритму Рабина",
-                ["bit_length", "m"],["p","q","crc", "c"],
+                ["bit_length", "m"],["p","q","c"],
                 "FirstFull",
                 [
                     new TestValuesSet(

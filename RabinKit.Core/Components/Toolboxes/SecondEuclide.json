@@ -140,6 +140,10 @@
         },
         {
           "kind": "block",
+          "type": "to_int"
+        },
+        {
+          "kind": "block",
           "type": "pow_mod"
         },
         {
