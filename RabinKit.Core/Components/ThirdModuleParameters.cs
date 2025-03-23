@@ -11,7 +11,7 @@ namespace RabinKit.Core.Components
             Tasks = new List<(int, int, string, string[], string[], string, List<TestValuesSet>, bool)>
             {
                 (3,numberCounter,
-                "Зашифровать сообщение и извлечь crc код для расшифровки",
+                "Зашифровать сообщение и создать crc-код исходного сообщения",
                 ["p", "q", "m"],["crc", "c"],
                 "FirstFull",
                 [

@@ -359,8 +359,37 @@ export const init = (toolbox, playgroundSource, parameters) => {
             "colour": 190,
             "tooltip": "Расшифровать сообщение получить списком все варианты расшифровки",
             "helpUrl": ""
+        },
+        {
+            "type": "logarithm",
+            "message0": "log %1 (%2)",
+            "args0": [
+                {
+                    "type": "input_value",
+                    "name": "base",
+                    "check": "Number"
+                },
+                {
+                    "type": "input_value",
+                    "name": "value",
+                    "check": "Number"
+                }
+            ],
+            "output": "Number",
+            "colour": 200,
+            "tooltip": "Вычисляет логарифм числа по заданному основанию.",
+            "helpUrl": ""
         }
     ]);
+
+    pythonGenerator.forBlock['logarithm'] = function (block, generator) {
+        generator.definitions_['import_math'] = 'import math';
+        var a = generator.valueToCode(block, 'base', Order.ATOMIC);
+        var b = generator.valueToCode(block, 'value', Order.ATOMIC);
+        var code = 'math.log(' + b + ', ' + a + ')';
+        return [code, Order.FUNCTION_CALL];
+    };
+
     pythonGenerator.forBlock['to_int'] = function (block, generator) {
         var _value = generator.valueToCode(block, 'val', Order.ATOMIC);
         var code = 'int(' + _value + ')';

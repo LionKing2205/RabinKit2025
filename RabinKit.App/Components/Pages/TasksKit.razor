@@ -140,7 +140,7 @@
         {
             case "description":
                 IDialogReference dialog = await DialogService.ShowAsync<DescriptionDialog>(
-                    _task.Name,
+                    null,
                     new DialogParameters
                         {
                 { nameof(DescriptionDialog.TaskC), _task },

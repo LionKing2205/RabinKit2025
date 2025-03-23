@@ -288,6 +288,10 @@ export const toolbox1 =  {
                 {
                     "kind": "block",
                     "type": "decryption_defs"
+                },
+                {
+                    "kind": "block",
+                    "type": "logarithm"
                 }
             ]
         },

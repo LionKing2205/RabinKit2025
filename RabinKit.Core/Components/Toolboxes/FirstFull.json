@@ -212,6 +212,10 @@
               }
             }
           }
+        },
+        {
+          "kind": "block",
+          "type": "logarithm"
         }
       ]
     },

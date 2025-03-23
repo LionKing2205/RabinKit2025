@@ -4,9 +4,6 @@
 @using Markdig
 
 <MudDialog>
-    <TitleContent>
-        <MudText Typo="Typo.h6">@TaskC.Name</MudText>
-    </TitleContent>
     <DialogContent>
         @((MarkupString)ConvertMarkdownToHtml(text))
     </DialogContent>

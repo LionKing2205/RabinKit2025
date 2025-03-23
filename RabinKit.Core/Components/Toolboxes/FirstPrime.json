@@ -200,6 +200,10 @@
               }
             }
           }
+        },
+        {
+          "kind": "block",
+          "type": "logarithm"
         }
       ]
     },

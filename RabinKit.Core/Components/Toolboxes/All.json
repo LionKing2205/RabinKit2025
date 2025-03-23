@@ -284,6 +284,10 @@
             {
               "kind": "block",
               "type": "decryption_def"
+            },
+            {
+              "kind": "block",
+              "type": "logarithm"
             }
           ]
         },
