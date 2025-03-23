@@ -92,5 +92,6 @@
 	<ItemGroup>
 		<None Include="Platforms\Windows\Package.appxmanifest" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
+	
 
 </Project>
