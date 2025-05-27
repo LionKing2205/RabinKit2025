@@ -36,7 +36,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Загрузка существующего студента по ID, если он передан
         var existingStudent = await DbContext.Students.FirstOrDefaultAsync();
         if (existingStudent != null)
         {
@@ -46,22 +45,18 @@
 
     private async Task SaveStudent()
     {
-        // Проверяем, существует ли студент
         var existingStudent = await DbContext.Students.FirstOrDefaultAsync();
 
             if (existingStudent != null)
             {
-                // Обновляем свойства
                 existingStudent.Name = _student.Name;
                 existingStudent.Group = _student.Group;
                 existingStudent.Year = _student.Year;
 
-                // Сохраняем изменения
                 await DbContext.SaveChangesAsync();
             }
             else
             {
-                // Если студент не найден, создаем новый
                 var newStudent = new Student
                     {
                         Name = _student.Name,

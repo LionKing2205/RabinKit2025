@@ -89,7 +89,7 @@ namespace RabinKit.Core.Components
                 (1,numberCounter,
                 "Разработать генератор ключа для криптосистемы Рабина",
                 ["bit_length"],["p", "q"],
-                "FirstPrime",
+                "FirstFull",
                 [
                     new TestValuesSet(
                     InputVars: new
@@ -129,15 +129,14 @@ namespace RabinKit.Core.Components
                     new TestValuesSet(
                     InputVars: new
                     {
-                        bit_length = 0,
-                        m = 0
+                        bit_length = 32,
+                        m = 1
                     },
                     OutputVars: new
                     {
                         p = "keytest",
                         q = "keytest",
-                        c = 0,
-                        crc = 0
+                        c = 1
                     }),
                 ],
                 true),

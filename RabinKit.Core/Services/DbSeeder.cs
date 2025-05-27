@@ -92,7 +92,6 @@ public class DbSeeder : IDbSeeder
         }
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
-    //AutoCounter<long> performanceTestIdCounter;
     private async Task InsertTaskAsync(
         int module,
         int number,
@@ -100,7 +99,6 @@ public class DbSeeder : IDbSeeder
         string[] inputVars,
         string[] outputVars,
         string toolboxFileName,
-        //long testIdCounter,
         AutoCounter<long> testIdCounter,
         List<ModuleSetExtension.TestValuesSet> testParams,
         bool istest = false,
@@ -125,7 +123,6 @@ public class DbSeeder : IDbSeeder
         var task = new TaskComponent
         {
             Id = id,
-           // Number = numbers,
             Name = name,
             Description = description,
             Input = inputVars,

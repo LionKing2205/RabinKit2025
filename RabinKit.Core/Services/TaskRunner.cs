@@ -1,6 +1,5 @@
 ﻿using RabinKit.Core.Abstractions;
 using RabinKit.Core.Entities;
-//using RabinKit.Core.Enums;
 using RabinKit.Core.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Scripting.Hosting;
@@ -125,7 +124,6 @@ namespace RabinKit.Core.Services
             {
                 return false;
             }
-            // Проверяем условие p = k * 4 + 3
             if (p % 4 != 3)
             {
                 return false;
@@ -183,7 +181,6 @@ namespace RabinKit.Core.Services
         private IEnumerable<(string Name, dynamic Value)> RunCode(
     TaskAttempt taskAttempt, Dictionary<string, string> parameters)
         {
-            // Prepare code once based on module ID
             var code = taskAttempt.Code;
             var moduleId = taskAttempt.TaskId / 10;
 
@@ -192,29 +189,23 @@ namespace RabinKit.Core.Services
                 code = EditCodeDefsDecrypt(code);
             }
 
-            // Compile the code once for reuse
             var compiledCode = _engine.CreateScriptSourceFromString(code).Compile();
 
-            // Create and populate scope
             var scope = _engine.CreateScope();
 
-            // Set default output value
             var firstOutput = taskAttempt.TaskComponents.Output.FirstOrDefault();
             if (!string.IsNullOrEmpty(firstOutput))
             {
                 scope.SetVariable(firstOutput, 0);
             }
 
-            // Process all parameters at once
             if (parameters.Count > 0)
             {
-                // Create a compiled converter for parameters
                 var intConverter = _engine.CreateScriptSourceFromString("def convert(x): return int(x)").Compile();
                 intConverter.Execute(scope);
 
                 foreach (var param in parameters)
                 {
-                    // Use compiled convert function instead of executing a new script for each value
                     dynamic convertFunction = scope.GetVariable("convert");
                     dynamic value = convertFunction(param.Value);
                     scope.SetVariable(param.Key, value);
@@ -602,7 +593,6 @@ namespace RabinKit.Core.Services
                     }
                     finally
                     {
-                        // Финальное обновление прогресса
                         callback(
                             value,
                             actualRuns > 0 ? test.Runs.GetValueOrDefault(value) : null,
@@ -626,7 +616,6 @@ namespace RabinKit.Core.Services
                     TimeSpan? previousValue = null;
                     TimeSpan? nextValue = null;
 
-                    // Находим предыдущее ненулевое значение
                     for (int j = i - 1; j >= 0; j--)
                     {
                         if (Runs[keys[j]] != null)
@@ -636,7 +625,6 @@ namespace RabinKit.Core.Services
                         }
                     }
 
-                    // Находим следующее ненулевое значение
                     for (int j = i + 1; j < keys.Count; j++)
                     {
                         if (Runs[keys[j]] != null)
@@ -646,7 +634,6 @@ namespace RabinKit.Core.Services
                         }
                     }
 
-                    // Если оба значения найдены, вычисляем среднее
                     if (previousValue.HasValue && nextValue.HasValue)
                     {
                         Runs[keys[i]] = TimeSpan.FromTicks((previousValue.Value.Ticks + nextValue.Value.Ticks) / 2);

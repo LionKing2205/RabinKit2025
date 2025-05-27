@@ -1,0 +1,11 @@
+﻿<?xml version='1.0'?>
+<Obfuscator>
+	<Var name="InPath" value="bin\Release\net8.0-windows10.0.19041.0\win-x64" />
+	<Var name="OutPath" value="bin\Release\Obfuscated" />
+	<Module file="$(InPath)\RabinKit.exe" />
+	<Module file="$(InPath)\RabinKit.Core.dll" />
+	<Module file="$(InPath)\RabinKit.Database.dll" />
+	<Module file="$(InPath)\RabinKit.BlockLib.dll" />
+	<SkipNamespace name="System.*" />
+	<SkipNamespace name="Microsoft.*" />
+</Obfuscator>

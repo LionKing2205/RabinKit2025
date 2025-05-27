@@ -73,16 +73,6 @@ else
                         Disabled="@(!isCodeValid || isButtonDisabled)">
                             Начать тест
                         </MudButton>
-                        @* <MudButton Class="no-wrap" Variant="Variant.Filled" Color="Color.Primary" Href=@($"/module/{module.Module}/{module.TestId}")>
-                        Начать тест
-                    </MudButton>  *@
-                        @* <MudButton Class="no-wrap"
-                               Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               Href=@($"/module/{module.Module}/{module.TestId}")
-                               Disabled="@(@module.Solved != @module.Total)">
-                        Начать тест
-                    </MudButton> *@
                         <MudText>@module.TestPassed</MudText>
                         <MudText>Время решения: @module.TestSolutionTime</MudText>
                     }
@@ -238,7 +228,7 @@ else
 
     private void StartTimer()
     {
-        timer = new System.Timers.Timer(60000); 
+        timer = new System.Timers.Timer(3600000); 
         timer.Elapsed += OnTimerElapsed;
         timer.AutoReset = false;
         timer.Start();

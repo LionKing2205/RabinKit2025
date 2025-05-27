@@ -101,7 +101,6 @@
     [Parameter] public string Code { get; set; }
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    // Метод для форматирования TimeSpan в формат "чч:мм:сс:мс"
     private string FormatTimeSpan(TimeSpan? timeSpan)
     {
         if (!timeSpan.HasValue) return "00:00:00:000";

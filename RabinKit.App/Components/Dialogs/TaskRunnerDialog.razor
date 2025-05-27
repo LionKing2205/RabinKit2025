@@ -1,6 +1,5 @@
 @using RabinKit.App.Services
 @using RabinKit.Core.Entities
-@* @using RabinKit.Core.Enums *@
 @using RabinKit.Core.Services
 @inject TaskRunner TaskRunner
 @inject ExceptionHandler ExceptionHandler 
@@ -52,11 +51,9 @@
         OnClick="() => ExceptionHandler.HandleAsync(RunAsync)"
         Variant="Variant.Filled">«апустить
         </MudButton>
-        @*  <MudButton Color="Color.Primary" OnClick="@Cancel" Variant="Variant.Filled">Close</MudButton> *@
     </DialogActions>
 </MudDialog>
 
-@* OnClick="() => ExceptionHandler.HandleAsync(RunAsync)" *@
 @code {
     [Parameter] 
     public TaskComponent TaskC { get; set; }
@@ -112,7 +109,6 @@
         }
 
             _isLoading = false;
-        //MudDialog.Close(attempt);
     }
     ///todo
     ///добавить автоматическое удаление данных с €чейки пр нажатии на €чейку
